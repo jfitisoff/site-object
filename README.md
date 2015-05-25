@@ -149,10 +149,10 @@ class HeaderBar < PageFeature
   end
 end
 
-# A page feature. This one models the footer bar with links that runs across the bottom of all of 
-# the site's pages. It can be added to a page object by calling the use_features method when 
-# defining a page's class. When added to a page class, the initialized page has an accessor method 
-# for it (see usage below.)
+# A page feature. This one models the footer bar with links that runs across the bottom of
+# all of the site's pages. It can be added to a page object by calling the use_features 
+# method when defining a page's class. When added to a page class, the initialized page has 
+# an accessor method for it (see usage below.)
 class FooterBar < PageFeature
   ['downloads', 'documentation', 'libraries',
    'community', 'news', 'security', 'about'].each do |lnk|
@@ -160,10 +160,11 @@ class FooterBar < PageFeature
   end
 end
 
-# Models the page that users first see when they access the site. The landing page will display 
-# summaries of the four most recent news posts. You can click on these summaries to drill down to a 
-# page that contains the complete news post. The landing page also has links to navigate to the news 
-# page, which has a larger selection of news posts (the last ten most recent posts.)
+# Models the page that users first see when they access the site. The landing page will
+# display summaries of the four most recent news posts. You can click on these summaries to
+# drill down to a page that contains the complete news post. The landing page also has links
+# to navigate to the news page, which has a larger selection of news posts (the last ten
+# most recent posts.)
 class LandingPage < RubyLangSite::Page
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL
   # matcher isn't provided.)
@@ -292,7 +293,11 @@ require 'watir-webdriver'
 
 # Create a site object. Watir will try to load Firefox. If you don't have Firefox installed
 # you can substitute another browser if you have installed the driver for it.
-site = RubyLangSite.new(base_url: "https://www.ruby-lang.org", browser: Watir::Browser.new, language: "en")
+site = RubyLangSite.new(
+  base_url: "https://www.ruby-lang.org", 
+  browser: Watir::Browser.new, 
+  language: "en"
+)
 
 # Load the landing page. Since you've just created the site object you haven't navigated to
 # any page yet. The site object figures this out by looking at the browser URL and 
@@ -309,8 +314,8 @@ site.landing_page.footer_bar.news.click
 
 # You're now on the news page. The site object knows about this. You can confirm that by
 # asking for the current page. The new page has been defined for the site so the site object
-# will look through all of its pages, determine that it's on the news page and then return a page
-# object for it.
+# will look through all of its pages, determine that it's on the news page and then return 
+# a page object for it.
 site.page
 
 # The news page will display the 10 most recent Ruby posts from the news feed. Ask the site
