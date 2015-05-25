@@ -118,9 +118,8 @@ a driver library.
 spec_helper.rb
 ```ruby
 # spec_helper.rb
-# This example implements some site object code for https://ruby-lang.org. The code here implements enough
-# functionality to write some code to test news posts on the site.
-
+# This example shows some site object code written for https://ruby-lang.org. The code here 
+#implements enough functionality to write some code to test news posts on the site.
 require 'site-object'
 require 'watir-webdriver'
 require 'rspec'
@@ -136,28 +135,30 @@ class RubyLangSite
   end
 end
 
-# A page feature. This one models the header bar with links that runs across the top of all of the site's 
-# pages. It can be added to a page object by calling the use_features method when defining a page's class. 
-# When added to a page class, the initialized page has an accessor method for it (see usage below.)
+# A page feature. This one models the header bar with links that runs across the top of all of the 
+# site's pages. It can be added to a page object by calling the use_features method when defining a 
+# page's class. When added to a page class, the initialized page has an accessor method for it (see 
+# usage below.)
 class HeaderBar < PageFeature
   ['downloads', 'documentation', 'libraries', 'community', 'news', 'security', 'about'].each do |lnk|
     element(lnk) { |b| b.div(:id, 'header_content').a(href: /\/#{lnk}/) }
   end
 end
 
-# A page feature. This one models the footer bar with links that runs across the bottom of all of the site's 
-# pages. It can be added to a page object by calling the use_features method when defining a page's class. 
-# When added to a page class, the initialized page has an accessor method for it (see usage below.)
+# A page feature. This one models the footer bar with links that runs across the bottom of all of 
+# the site's pages. It can be added to a page object by calling the use_features method when 
+# defining a page's class. When added to a page class, the initialized page has an accessor method 
+# for it (see usage below.)
 class FooterBar < PageFeature
   ['downloads', 'documentation', 'libraries', 'community', 'news', 'security', 'about'].each do |lnk|
     element(lnk) { |b| b.div(:id, 'footer').a(href: /\/#{lnk}/) }
   end
 end
 
-# Models the page that users first see when they access the site. The landing page will display summaries
-# of the four most recent news posts. You can click on these summaries to drill down to a page that contains
-# the complete news post. The landing page also has links to navigate to the news page, which has a larger
-# selection of news posts (the last ten most recent posts.)
+# Models the page that users first see when they access the site. The landing page will display 
+# summaries of the four most recent news posts. You can click on these summaries to drill down to a 
+# page that contains the complete news post. The landing page also has links to navigate to the news 
+# page, which has a larger selection of news posts (the last ten most recent posts.)
 class LandingPage < RubyLangSite::Page
   set_url "/{language}/"  # Sets a templated URL that will be used for navigation (and for URL matching if a URL matcher isn't provided.)
   use_features :header_bar, :footer_bar  # See HeaderBar and FooterBar page features defined above.  
@@ -168,8 +169,8 @@ class LandingPage < RubyLangSite::Page
   end
 end
 
-# Models the new page, which shows summaries of the last ten most recent posts. The user can drill down on 
-# these summaries to read the full story. 
+# Models the new page, which shows summaries of the last ten most recent posts. The user can drill 
+# down on these summaries to read the full story. 
 class NewsPage < RubyLangSite::Page
   set_url "/{language}/news/" # Sets a templated URL that will be used for navigation (and for URL matching if a URL matcher isn't provided.)
   use_features :header_bar, :footer_bar  # See HeaderBar and FooterBar page features defined above. 
@@ -180,8 +181,8 @@ class NewsPage < RubyLangSite::Page
   end
 end
 
-# This page hosts a single, complete, news post. Users get to it by drilling down on sumaries on the landing
-# page or the news page.
+# This page hosts a single, complete, news post. Users get to it by drilling down on sumaries on 
+# the landing page or the news page.
 class NewsPostPage < RubyLangSite::Page
   set_url_matcher  %r{/en/news/\d+/\d+/\d+/\S+/} #
   disable_automatic_navigation
@@ -190,7 +191,8 @@ class NewsPostPage < RubyLangSite::Page
   element(:post) { |b| Post.new(b.div(:id, 'content-wrapper')) }
 end
 
-# An element container class. This class adds a little bit of functionality to the underlying element.
+# An element container class. This class adds a little bit of functionality to the underlying 
+# element.
 class Post < ElementContainer
   def post_title
     links[0]
@@ -201,7 +203,8 @@ class Post < ElementContainer
   end
 end
 
-# An element container class. This class adds a little bit of functionality to the Post class it inherits from.
+# An element container class. This class adds a little bit of functionality to the Post class it 
+# inherits from.
 class PostSummary < Post
 
   def continue_reading
@@ -276,34 +279,35 @@ pry and irb
 require 'site-object'
 require 'watir-webdriver'
 
-# Create a site object. Watir will try to load Firefox. If you don't have Firefox installed you can substitute
-# another browser if you have installed the driver for it.
+# Create a site object. Watir will try to load Firefox. If you don't have Firefox installed you can 
+# substitute another browser if you have installed the driver for it.
 site = RubyLangSite.new(base_url: "https://www.ruby-lang.org", browser: Watir::Browser.new, language: "en")
 
-# Load the landing page. Since you've just created the site object you haven't navigated to any page yet.
-# The site object figures this out by looking at the browser URL and automatically loads the page. The 
-# method call will return a LandingPage object.
+# Load the landing page. Since you've just created the site object you haven't navigated to any 
+# page yet. The site object figures this out by looking at the browser URL and automatically loads 
+# the page. The method call will return a LandingPage object.
 site.landing_page
 
-# Get the landing page again. No navigation occurs this time because the site object sees that it's already
-# on the landing page.
+# Get the landing page again. No navigation occurs this time because the site object sees that it's 
+# already on the landing page.
 site.landing_page
 
-# Drill down to the news page from the landing page by clicking on the link to the news page in the landing
-# page's footer bar.
+# Drill down to the news page from the landing page by clicking on the link to the news page in the 
+# landing page's footer bar.
 site.landing_page.footer_bar.news.click
 
-# You're now on the news page. The site object knows about this. You can confirm that by asking for the
-# current page. The new page has been defined for the site so the site object will look through all of its
-# pages, determine that it's on the news page and then return a page object for it.
+# You're now on the news page. The site object knows about this. You can confirm that by asking for
+# the current page. The new page has been defined for the site so the site object will look through
+# all of its pages, determine that it's on the news page and then return a page object for it.
 site.page
 
 # The news page will display the 10 most recent Ruby posts from the news feed. Ask the site how many
 # posts are on the page:
 site.page.posts.length
 
-# If the site object sees a method it doesn't recognize it delegates the method to the current page, if
-# it recognizes it. So it's often possible to avoid explicit calls to pages if you want to do that.
+# If the site object sees a method it doesn't recognize it delegates the method to the current page, 
+# if it recognizes it. So it's often possible to avoid explicit calls to pages if you want to do 
+# that.
 site.landing_page # Go to the landing page unless you're already on it.
 site.landing_page.posts.length # Should return 4.
 site.header_bar.news.click # Method call gets delegated to the landing page and the click navigates you to the news page.
@@ -313,33 +317,5 @@ site.posts[0].title.text # Get the title text of the most recent post.
 site.posts[0].continue_reading.click # Drill down on the most recent post.
 site.page # You should now be on the page that displays a full post (NewsPostPage.)
 ```
-
-
-features
-===============
-* Can be used with both Watir and Selenium Webdriver.
-*
-
-
-site-object is a library that provides a wrapper class for page objects. 
-
-Example
--------
-```ruby
-
-require 'watir-webdriver'
-
-browser = Watir::Browser.new :firefox
-browser.goto "http://google.com"
-browser.text_field(:name => 'q').set("WebDriver rocks!")
-browser.button(:name => 'btnG').click
-puts browser.url
-browser.close
-```
-
-Description
------------
-
-The file in lib/watir/elements/generated.rb is autogenerated from the HTML5 spec. This is done by extracting the IDL parts from the spec and processing them with the WebIDL gem (link below).
 
 
