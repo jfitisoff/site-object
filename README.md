@@ -28,18 +28,20 @@ Defining and Using Page Objects
 ===============
 
 ```ruby
-# When the SiteObject module is imported it automatically creates a Page class underneath the site object.
-# You'll inherit from this class when defining pages for the site.
+# When the SiteObject module is imported it automatically creates a Page class underneath the
+# site object. You'll inherit from this class when defining pages for the site.
 class MySite
   include SiteObject
 end
 
 # New page class inherits from the site's Page class (see above.)
 class LoginPage < MySite::Page
-  set_url "/login" # If this is a relative URL then it'll be appended to the base_url defined when site is initialized.
+  # If this is a relative URL then it'll be appended to the base_url defined when site is initialized.
+  set_url "/login"
 
-  # Page element definitions.
-  element(:user_name) { |b| b.text_field(:id, 'user_name') } # The text_field method is a Watir method but Selenium could be used here too.
+  # Page element definitions. # The text_field and button methods below are Watir methods but 
+  # Selenium could be used here too.
+  element(:user_name) { |b| b.text_field(:id, 'user_name') } 
   element(:password)  { |b| b.text_field(:id, 'password') }
   element(:login)     { |b| b.button(:name, 'Login') }
 
@@ -50,6 +52,7 @@ class LoginPage < MySite::Page
     login.click
   end
 end
+```
 
 A few notes about the page object code example: 
 
@@ -69,8 +72,6 @@ Note that the login method utilizes the page elements defined earlier.
 
 When defining a page object you have access to the browser as well. It's not shown in the example above but
 you can access it via @browser.
-
-```
 
 Page Features
 ===============
