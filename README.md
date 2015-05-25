@@ -224,8 +224,8 @@ class PostSummary < Post
 end
 ```
 
-landing_page_tests.rb
 ```ruby
+# landing_page_tests.rb
 # Some RSpec tests for the news post functionality of the https://ruby-lang.org site.
 require_relative 'spec_helper'
 
