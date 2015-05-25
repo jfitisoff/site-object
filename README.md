@@ -15,7 +15,7 @@ site = MySite.new(base_url: "http://mysite.org", browser: browser_obj)
 ```
 
 In the example above, the browser argument is optional. The site object also has open_browser and close_browser
-methods that you can use to open or close a browser after initialization:
+methods that you can use to open or close a browser after a site object has been initialized:
 
 ```ruby
 site = MySite.new(base_url: "http://mysite.org")
@@ -117,7 +117,6 @@ The following test example uses rspec and watir-webdriver and was tested with Fi
 watir-webdriver and selenium-webdriver support out of the box because the Firefox webdriver 
 implementation doesn't require a driver library.  
 
-spec_helper.rb
 ```ruby
 # spec_helper.rb
 # This example shows some site object code written for https://ruby-lang.org. The code here 
@@ -225,10 +224,9 @@ class PostSummary < Post
 end
 ```
 
-landing_page.rb
+landing_page_tests.rb
 ```ruby
-# Some RSpec tests that check out the news post functionality of the https://ruby-lang.org
-# site.
+# Some RSpec tests for the news post functionality of the https://ruby-lang.org site.
 require_relative 'spec_helper'
 
 describe "https://ruby-lang.org" do
