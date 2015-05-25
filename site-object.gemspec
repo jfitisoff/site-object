@@ -23,4 +23,6 @@ Gem::Specification.new do |s|
     "lib/site-object/site.rb",
     "lib/site-object/version.rb"
   ]
+  s.add_runtime_dependency "activesupport" 
+  s.add_runtime_dependency "addressable", '~> 2.3', '>= 2.3.8'
 end
