@@ -240,7 +240,6 @@ describe "https://ruby-lang.org" do
     @site = RubyLangSite.new(Watir::Browser.new, "en")
   end
 
-
   describe "Landing Page:" do
 
     it "shows 4 news posts on the landing page" do
