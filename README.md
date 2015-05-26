@@ -136,10 +136,9 @@ class RubyLangSite
   attr_accessor :language 
   include SiteObject
   
-  # Mandatory keyword arguments, new in Ruby 2.1.x.
-  def initialize(base_url:, browser:, language:)
-    @language = language  # Set the attr_accessor defined for thse class.
-    super base_url: base_url, browser: browser # Finish initialization.
+  def initialize(browser, language)
+    @language = language  # Set the attr_accessor defined for this class.
+    super base_url: "https://www.ruby-lang.org", browser: browser # Finish initialization.
   end
 end
 
@@ -238,11 +237,7 @@ require_relative 'spec_helper'
 describe "https://ruby-lang.org" do
   
   before(:all) do
-    @site = RubyLangSite.new(
-      base_url: "https://www.ruby-lang.org", 
-      browser: Watir::Browser.new,
-      language: "en"
-    )
+    @site = RubyLangSite.new(Watir::Browser.new, "en")
   end
 
 
@@ -302,11 +297,10 @@ require 'watir-webdriver'
 # Create a site object. Watir will try to load Firefox. If you don't have Firefox installed
 # you can substitute another browser if you have installed the driver for it. If a failure 
 # occurs here it's likely for that reason.
-site = RubyLangSite.new(
-  base_url: "https://www.ruby-lang.org", 
-  browser: Watir::Browser.new, 
-  language: "en"
-)
+#
+# Site objects typically take a hash of values but the init routine was modified for 
+# this one, see above.
+site = RubyLangSite.new(Watir::Browser.new, "en")
 
 # Load the landing page. Since you've just created the site object you haven't navigated to
 # any page yet. The site object figures this out by looking at the browser URL and 
@@ -339,7 +333,7 @@ site.landing_page.posts.length # Should return 4.
 site.header_bar.news.click # Method call gets delegated to the landing page.
 site.page # You should get a news page object back here since you should be on the news page.       
 site.posts.length # Should return 10 since the news page normally displays 10 summaries.
-site.posts[0].title.text # Get the title text of the most recent post.
+site.posts[0].post_title.text # Get the title text of the most recent post.
 site.posts[0].continue_reading.click # Drill down on the most recent post.
 site.page # You should now be on the page that displays a full post (NewsPostPage.)
 ```
