@@ -53,6 +53,12 @@ class LoginPage < MySite::Page
     login.click
   end
 end
+
+# After the new site object is initialized it will have a login_page accessor method for the 
+# LoginPage class.
+site = MySite.new(base_url: "http://mysite.org", browser: Watir::Browser.new)
+site.login_page # Nav to login and return a LoginPage object.
+
 ```
 
 A few notes about the page object code example: 
@@ -177,7 +183,7 @@ class LandingPage < RubyLangSite::Page
   end
 end
 
-# Models the new page, which shows summaries of the last ten most recent posts. The user
+# Models the news page, which shows summaries of the last ten most recent posts. The user
 # can drill down on these summaries to read the full story. 
 class NewsPage < RubyLangSite::Page
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL 
@@ -285,12 +291,17 @@ pry and irb
 ===============
 
 ```ruby
+# Note: The commands shown here rely on the sample code shown above for
+# https://ruby-lang.org. You'll need get that code in your pry ot irb session for these
+# examples to work.
+
 # Load site-object and watir-webdriver.
 require 'site-object'
 require 'watir-webdriver'
 
 # Create a site object. Watir will try to load Firefox. If you don't have Firefox installed
-# you can substitute another browser if you have installed the driver for it.
+# you can substitute another browser if you have installed the driver for it. If a failure 
+# occurs here it's likely for that reason.
 site = RubyLangSite.new(
   base_url: "https://www.ruby-lang.org", 
   browser: Watir::Browser.new, 
