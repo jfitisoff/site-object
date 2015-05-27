@@ -1,5 +1,6 @@
 # site-object
-Wraps page objects up into a site object, which provides some introspection and navigation capabilities page objects don't provide. Works with Watir and Selenium.
+Wraps page objects up into a site object, which provides some introspection and navigation capabilities 
+page objects don't provide. Works with Watir and Selenium.
 
 Defining and Instantiating a Site Object
 ===============
@@ -90,10 +91,10 @@ pages. Here's how the footer could be implemented via a page feature:
 
 ```ruby
 class Footer < PageFeature
-  element(:about) { |b| b.div(:id, 'footer').link(:text, 'About') }
-  element(:about) { |b| b.div(:id, 'footer').link(:text, 'Careers') }
-  element(:about) { |b| b.div(:id, 'footer').link(:text, 'News') }
-  element(:about) { |b| b.div(:id, 'footer').link(:text, 'Contact') }
+  element(:about)   { |b| b.div(:id, 'footer').link(:text, 'About') }
+  element(:careers) { |b| b.div(:id, 'footer').link(:text, 'Careers') }
+  element(:news)    { |b| b.div(:id, 'footer').link(:text, 'News') }
+  element(:contact) { |b| b.div(:id, 'footer').link(:text, 'Contact') }
 end
 
 class MyPage < MySite::Page
