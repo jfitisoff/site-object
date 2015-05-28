@@ -287,7 +287,7 @@ pry and irb
 
 ```ruby
 # Note: The commands shown here rely on the sample code shown above for
-# https://ruby-lang.org. You'll need get that code in your pry ot irb session for these
+# https://ruby-lang.org. You'll need get that code in your pry or irb session for these
 # examples to work.
 
 # Load site-object and watir-webdriver.
