@@ -72,7 +72,7 @@ that can change at runtime. For more info, see the Page.set_url method in the do
 
 Element definitions take two arguments: an element method name and a block defining how the 
 element is accessed.The block argument 'b' is a browser/driver object that gets passed down to 
-the element from the page it'sgetting accessed from. In the example, Watir is getting used but 
+the element from the page it's getting accessed from. In the example, Watir is getting used but 
 you could used Selenium here too. There's no abstraction layer between the page object library 
 and Selenium/Watir -- you work directly with the underlying browser library and have access to 
 everything that Watir or Selenium can do.
@@ -127,7 +127,7 @@ implementation doesn't require a driver library.
 ```ruby
 # spec_helper.rb
 # This example shows some site object code written for https://ruby-lang.org. The code here 
-#implements enough functionality to write some code to test news posts on the site.
+# implements enough functionality to write some code to test news posts on the site.
 require 'site-object'
 require 'watir-webdriver'
 require 'rspec'
