@@ -2,6 +2,8 @@
 Wraps page objects up into a site object, which provides some introspection and navigation capabilities 
 page objects don't provide. Works with Watir and Selenium.
 
+Features
+
 Defining and Instantiating a Site Object
 ===============
 
@@ -272,7 +274,6 @@ describe "https://ruby-lang.org" do
     end
 
     it "drills down on the most recent post summary" do
-      landing_page_title = @site.landing_page.posts[0].post_title.text
       @site.landing_page.posts[0].continue_reading.click
       expect(@site.page).to be_instance_of NewsPostPage
     end
