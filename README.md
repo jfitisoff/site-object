@@ -1,8 +1,6 @@
 # site-object
-Wraps page objects up into a site object, which provides some introspection and navigation capabilities 
+Wraps page objects up into a site object, which provides some introspection and navigation capabilities
 page objects don't provide. Works with Watir and Selenium.
-
-Features
 
 Defining and Instantiating a Site Object
 ===============
@@ -43,9 +41,9 @@ class LoginPage < MySite::Page
   # initialized.
   set_url "/login"
 
-  # Page element definitions. # The text_field and button methods below are Watir methods but 
+  # Page element definitions. # The text_field and button methods below are Watir methods but
   # Selenium could be used here too.
-  element(:user_name) { |b| b.text_field(:id, 'user_name') } 
+  element(:user_name) { |b| b.text_field(:id, 'user_name') }
   element(:password)  { |b| b.text_field(:id, 'password') }
   element(:login)     { |b| b.button(:name, 'Login') }
 
@@ -57,31 +55,31 @@ class LoginPage < MySite::Page
   end
 end
 
-# After the new site object is initialized it will have a login_page accessor method for the 
+# After the new site object is initialized it will have a login_page accessor method for the
 # LoginPage class.
 site = MySite.new(base_url: "http://mysite.org", browser: Watir::Browser.new)
 site.login_page # Nav to login and return a LoginPage object.
 
 ```
 
-A few notes about the page object code example: 
+A few notes about the page object code example:
 
-The set_url method is used to define a template for the page's URL. It can be a partial or full 
-URL, or you can omit it entirely, in which case the page's URL will be the same as the base_url. 
-The URL defined here is used to create a URL template, which gets utilized for both navigation 
-and to determine if the page is being displayed. Templates can be defined with dynamic values 
+The set_url method is used to define a template for the page's URL. It can be a partial or full
+URL, or you can omit it entirely, in which case the page's URL will be the same as the base_url.
+The URL defined here is used to create a URL template, which gets utilized for both navigation
+and to determine if the page is being displayed. Templates can be defined with dynamic values
 that can change at runtime. For more info, see the Page.set_url method in the documentation.
 
-Element definitions take two arguments: an element method name and a block defining how the 
-element is accessed.The block argument 'b' is a browser/driver object that gets passed down to 
-the element from the page it's getting accessed from. In the example, Watir is getting used but 
-you could used Selenium here too. There's no abstraction layer between the page object library 
-and Selenium/Watir -- you work directly with the underlying browser library and have access to 
+Element definitions take two arguments: an element method name and a block defining how the
+element is accessed.The block argument 'b' is a browser/driver object that gets passed down to
+the element from the page it's getting accessed from. In the example, Watir is getting used but
+you could used Selenium here too. There's no abstraction layer between the page object library
+and Selenium/Watir -- you work directly with the underlying browser library and have access to
 everything that Watir or Selenium can do.
 
 Note that the login method utilizes the page elements defined earlier.
 
-When defining a page object you have access to the browser as well. It's not shown in the 
+When defining a page object you have access to the browser as well. It's not shown in the
 example above but you can access it via @browser.
 
 Page Features
@@ -115,20 +113,20 @@ Element Containers
 ===============
 
 This is an experimental feature that may or may not be useful to you (it's designed with Watir
-in mind.) The idea is to provide a wrapper around the element that will allow you to add some 
+in mind.) The idea is to provide a wrapper around the element that will allow you to add some
 features that the underlying element may not provide. See code examples below.
 
 
 RSpec Example:
 ===============
 
-The following test example uses rspec and watir-webdriver and was tested with Firefox, which 
-watir-webdriver and selenium-webdriver support out of the box because the Firefox webdriver 
+The following test example uses rspec and watir-webdriver and was tested with Firefox, which
+watir-webdriver and selenium-webdriver support out of the box because the Firefox webdriver
 implementation doesn't require a driver library.  
 
 ```ruby
 # spec_helper.rb
-# This example shows some site object code written for https://ruby-lang.org. The code here 
+# This example shows some site object code written for https://ruby-lang.org. The code here
 # implements enough functionality to write some code to test news posts on the site.
 require 'site-object'
 require 'watir-webdriver'
@@ -136,9 +134,9 @@ require 'rspec'
 
 # The site object for ruby-lang.org.
 class RubyLangSite
-  attr_accessor :language 
+  attr_accessor :language
   include SiteObject
-  
+
   def initialize(browser, language)
     @language = language  # Set the attr_accessor defined for this class.
     super base_url: "https://www.ruby-lang.org", browser: browser # Finish initialization.
@@ -146,19 +144,19 @@ class RubyLangSite
 end
 
 # A page feature. This one models the header bar with links that runs across the top of all
-# of the site's pages. It can be added to a page object by calling the use_features method 
-# when defining a page's class. When added to a page class, the initialized page has an 
+# of the site's pages. It can be added to a page object by calling the use_features method
+# when defining a page's class. When added to a page class, the initialized page has an
 # accessor method for it (see usage below.)
 class HeaderBar < PageFeature
-  ['downloads', 'documentation', 'libraries', 
+  ['downloads', 'documentation', 'libraries',
    'community', 'news', 'security', 'about'].each do |lnk|
     element(lnk) { |b| b.div(:id, 'header_content').a(href: /\/#{lnk}/) }
   end
 end
 
 # A page feature. This one models the footer bar with links that runs across the bottom of
-# all of the site's pages. It can be added to a page object by calling the use_features 
-# method when defining a page's class. When added to a page class, the initialized page has 
+# all of the site's pages. It can be added to a page object by calling the use_features
+# method when defining a page's class. When added to a page class, the initialized page has
 # an accessor method for it (see usage below.)
 class FooterBar < PageFeature
   ['downloads', 'documentation', 'libraries',
@@ -175,22 +173,22 @@ end
 class LandingPage < RubyLangSite::Page
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL
   # matcher isn't provided.)
-  set_url "/{language}/" 
+  set_url "/{language}/"
   use_features :header_bar, :footer_bar # See HeaderBar and FooterBar defined above.  
 
-  # Create a method that takes all of the landing page post divs and wrap some more 
+  # Create a method that takes all of the landing page post divs and wrap some more
   # functionality around them. Also see PostSummary class above.
   def posts
-    @browser.divs(:class, 'post').map { |div| PostSummary.new(div) } 
+    @browser.divs(:class, 'post').map { |div| PostSummary.new(div) }
   end
 end
 
 # Models the news page, which shows summaries of the last ten most recent posts. The user
-# can drill down on these summaries to read the full story. 
+# can drill down on these summaries to read the full story.
 class NewsPage < RubyLangSite::Page
-  # Sets a templated URL that will be used for navigation (and for URL matching if a URL 
-  # matcher isn't provided.) See HeaderBar and FooterBar page features defined above. 
-  set_url "/{language}/news/" 
+  # Sets a templated URL that will be used for navigation (and for URL matching if a URL
+  # matcher isn't provided.) See HeaderBar and FooterBar page features defined above.
+  set_url "/{language}/news/"
   use_features :header_bar, :footer_bar  
 
   # Returns all post summary divs with a little extra functionality wrapped around them.
@@ -199,7 +197,7 @@ class NewsPage < RubyLangSite::Page
   end
 end
 
-# This page hosts a single, complete, news post. Users get to it by drilling down on 
+# This page hosts a single, complete, news post. Users get to it by drilling down on
 # summaries on the landing page or the news page.
 class NewsPostPage < RubyLangSite::Page
   set_url_matcher  %r{/en/news/\d+/\d+/\d+/\S+/} #
@@ -209,13 +207,13 @@ class NewsPostPage < RubyLangSite::Page
   element(:post) { |b| Post.new(b.div(:id, 'content-wrapper')) }
 end
 
-# An element container class. This class adds a little bit of functionality to the 
+# An element container class. This class adds a little bit of functionality to the
 # underlying element.
 class Post < ElementContainer
   def post_title
     links[0]
   end
-  
+
   def post_info
     p(:class, 'post-info')
   end
@@ -238,7 +236,7 @@ end
 require_relative 'spec_helper'
 
 describe "https://ruby-lang.org" do
-  
+
   before(:all) do
     @site = RubyLangSite.new(Watir::Browser.new, "en")
   end
@@ -283,7 +281,7 @@ describe "https://ruby-lang.org" do
 end
 ```
 
-pry and irb 
+pry and irb
 ===============
 
 ```ruby
@@ -296,15 +294,15 @@ require 'site-object'
 require 'watir-webdriver'
 
 # Create a site object. Watir will try to load Firefox. If you don't have Firefox installed
-# you can substitute another browser if you have installed the driver for it. If a failure 
+# you can substitute another browser if you have installed the driver for it. If a failure
 # occurs here it's likely for that reason.
 #
-# Site objects typically take a hash of values but the init routine was modified for 
+# Site objects typically take a hash of values but the init routine was modified for
 # this one, see above.
 site = RubyLangSite.new(Watir::Browser.new, "en")
 
 # Load the landing page. Since you've just created the site object you haven't navigated to
-# any page yet. The site object figures this out by looking at the browser URL and 
+# any page yet. The site object figures this out by looking at the browser URL and
 # automatically loads the page. The method call will return a LandingPage object.
 site.landing_page
 
@@ -318,7 +316,7 @@ site.landing_page.footer_bar.news.click
 
 # You're now on the news page. The site object knows about this. You can confirm that by
 # asking for the current page. The new page has been defined for the site so the site object
-# will look through all of its pages, determine that it's on the news page and then return 
+# will look through all of its pages, determine that it's on the news page and then return
 # a page object for it.
 site.page
 
@@ -326,17 +324,15 @@ site.page
 # how many posts are on the page:
 site.page.posts.length
 
-# If the site object sees a method it doesn't recognize it delegates the method to the 
+# If the site object sees a method it doesn't recognize it delegates the method to the
 # current page, if it recognizes it. So it's often possible to avoid explicit calls to pages
 # if you want to do that.
 site.landing_page # Go to the landing page unless you're already on it.
 site.landing_page.posts.length # Should return 4.
 site.header_bar.news.click # Method call gets delegated to the landing page.
-site.page # You should get a news page object back here since you should be on the news page.       
+site.page # You should get a news page object back here since you should be on the news page.
 site.posts.length # Should return 10 since the news page normally displays 10 summaries.
 site.posts[0].post_title.text # Get the title text of the most recent post.
 site.posts[0].continue_reading.click # Drill down on the most recent post.
 site.page # You should now be on the page that displays a full post (NewsPostPage.)
 ```
-
-

@@ -23,12 +23,12 @@ module SiteObject
     @browser.close # Same for watir-webdriver and selenium-webdriver.
   end
 
-  # Helper method designed to assist with complex workflows. Basically, if you're navigating and 
-  # expect a certain page to be displayed you can use this method to confirm that the page you want is 
+  # Helper method designed to assist with complex workflows. Basically, if you're navigating and
+  # expect a certain page to be displayed you can use this method to confirm that the page you want is
   # displayed and then get a page object for it.
   #
-  # This method just checks to see if the right class of page is being displayed. If you have defined 
-  # a templated value in the URL of the page object getting checked it doesn't check the values of 
+  # This method just checks to see if the right class of page is being displayed. If you have defined
+  # a templated value in the URL of the page object getting checked it doesn't check the values of
   # the arguments. It only confirms whether or not the arguments are present.
   def expect_page(page_arg)
     p = page
@@ -41,19 +41,19 @@ module SiteObject
       elsif page_arg.is_a?(Symbol) && p.class.name.underscore.to_sym == page_arg
         return p
       else
-        raise SiteObject::WrongPageError, "Expected #{page_arg} page to be displayed but the URL doesn't look right. \n\n#{caller.join("\n")}" 
+        raise SiteObject::WrongPageError, "Expected #{page_arg} page to be displayed but the URL doesn't look right. \n\n#{caller.join("\n")}"
       end
     else
       raise SiteObject::WrongPageError, "Expected #{page_arg} page to be displayed but the URL doesn't appear to match the URL template of any known page. \n\n#{caller.join("\n")}"
     end
   end
 
-  # Creates a site object, which will have accessor methods for all pages that have been defined for 
-  # the site. This object takes a hash argument. There is only one required value (the base_url for 
+  # Creates a site object, which will have accessor methods for all pages that have been defined for
+  # the site. This object takes a hash argument. There is only one required value (the base_url for
   # the site.) Example:
   #
   #  class MySite
-  #    include SiteObject 
+  #    include SiteObject
   #  end
   #
   #  site = MySite.new(base_url: "http://foo.com")
@@ -63,28 +63,26 @@ module SiteObject
   #  site = MySite.new(
   #    base_url: "http://foo.com",
   #    foo:      true
-  #    bar:      1  
+  #    bar:      1
   #  )
   #  site.foo
   #  => true
   #  site.bar
   #  => 1
-  def initialize(args={})  
+  def initialize(args={})
     unless args.is_a?(Hash)
-      unless
-        raise SiteObject::SiteInitError, "You must provide hash arguments when initializing a site object. At a minimum you must specify a base_url. Example:\ns = SiteObject.new(base_url: 'http://foo.com')"
-      end
+      raise SiteObject::SiteInitError, "You must provide hash arguments when initializing a site object. At a minimum you must specify a base_url. Example:\ns = SiteObject.new(base_url: 'http://foo.com')"
     end
-    
+
     @arguments   = args.with_indifferent_access
     @base_url    = @arguments[:base_url]
     @browser     = @arguments[:browser]
     @pages       = self.class::Page.descendants
-    
+
     # Set up accessor methods for each page and defines the URL template.
     @pages.each do |current_page|
       current_page.set_url_template(@base_url)
-      
+
       self.class.class_eval do
         define_method(current_page.to_s.underscore) do |args={}, block=nil|
           current_page.new(self, args)
@@ -110,8 +108,8 @@ module SiteObject
 
   # In cases where the site object doesn't recognize a method it will try to delegate the method call
   # to the page that's currently being displayed in the browser, assuming that the site object recognizes
-  # the page by its URL. If the page is the last visited page and method is unique, (i.e., doesn't belong 
-  # to any other page object) then the site object won't attempt to regenerate the page when calling 
+  # the page by its URL. If the page is the last visited page and method is unique, (i.e., doesn't belong
+  # to any other page object) then the site object won't attempt to regenerate the page when calling
   # the method.
   def method_missing(sym, *args, &block)
     if @unique_methods.include?(sym) && @most_recent_page.respond_to?(sym)
@@ -133,7 +131,7 @@ module SiteObject
         elsif block
           p.send(sym, &block)
         else
-          p.send sym 
+          p.send sym
         end
       else
         super
@@ -144,7 +142,7 @@ module SiteObject
   end
 
   # Returns true or false depending on whether the specified page is displayed. You can use a page
-  # object or a PageObject class name to identify the page you are looking for. Examples: 
+  # object or a PageObject class name to identify the page you are looking for. Examples:
   #
   #  page = site.account_summary_page
   #  =>#<AccountSummaryPage:70341126478080 ...>
@@ -165,7 +163,7 @@ module SiteObject
     end
   end
 
-  # Can be used to open a browser for the site object if the user did not pass one in when it was 
+  # Can be used to open a browser for the site object if the user did not pass one in when it was
   # initialized. The arguments used here get passed down to Watir when starting the browser. Example:
   #  s = SomeSite.new(hash)
   #  s.open_browser :watir, :firefox
@@ -183,7 +181,7 @@ module SiteObject
     end
   end
 
-  # Looks at the page currently being displayed in the browser and tries to return a page object for 
+  # Looks at the page currently being displayed in the browser and tries to return a page object for
   # it. Does this by looking at the currently displayed URL in the browser. The first page that gets
   # checked is the page that was most recently accessed. After that it will cycle through all available
   # pages looking for a match. Returns nil if it can't find a matching page object.
@@ -192,7 +190,7 @@ module SiteObject
 
     url = @browser.url
     found_page = nil
-    
+
     @pages.each do |p|
       if p.url_template.match url
         found_page = p
@@ -202,8 +200,8 @@ module SiteObject
 
       break if found_page
     end
- 
-    if found_page && !found_page.required_arguments.empty? 
+
+    if found_page && !found_page.required_arguments.empty?
       return found_page.new(self, found_page.url_template.extract(url))
     elsif found_page
       return found_page.new(self)
