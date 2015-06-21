@@ -79,13 +79,17 @@ module SiteObject
     @browser     = @arguments[:browser]
     @pages       = self.class::Page.descendants
 
-    # Set up accessor methods for each page and defines the URL template.
+    # Set up accessor methods for each page and page checking methods..
     @pages.each do |current_page|
       current_page.set_url_template(@base_url)
 
       self.class.class_eval do
         define_method(current_page.to_s.underscore) do |args={}, block=nil|
           current_page.new(self, args)
+        end
+
+        define_method("#{current_page.to_s.underscore}?") do
+          on_page? current_page
         end
       end
     end
@@ -210,5 +214,5 @@ module SiteObject
     end
   end
 
-  at_exit {@browser.close if @browser}
+  at_exit { @browser.close if @browser }
 end
