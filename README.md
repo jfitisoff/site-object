@@ -2,6 +2,135 @@
 Wraps page objects up into a site object, which provides some introspection and navigation capabilities
 page objects don't provide. Works with Watir and Selenium.
 
+Features
+===============
+*Easily Handle Multiple Test Environments*
+One pretty common problem for testers is writing automation that can be applied against
+multiple development environments. Site objects allow you to set a base URL when
+initializing a site and then specify relative URLs for all of your pages. This allows
+you to define a different base URL at runtime based on the environment you want to
+run your tests against. You can also override the base URL on a per page basis if you
+need to.
+
+*Simpler Page Object Initialization and Navigation*
+Your browser library (Watir or Selenium) gets initialized at the site level. The site
+object stores a browser reference and automatically passes it down to a page object
+as it gets initialized. So there's no need to feed a page object a browser object every
+time you need a page.
+
+Site objects automatically define accessor methods for every page object that you create.
+When you call an accessor method it handles navigation automatically. If you're not
+currently on the page you're calling it will automatically navigate to the page before
+returning the page object. If you *are* on the page already it'll just return a page object
+for the page without doing any navigation.
+
+This reduces the amount of code that you have to write to get a page. Typically, most
+page object frameworks have you do it something like this:
+
+```ruby
+page = MyPage.new(browser)
+page.visit
+```
+
+Here's the equivalent site object code:
+
+```ruby
+site.my_page  # Page is loaded automatically if it's not getting displayed.
+```
+
+*Note 1:* There's also an additional helper method that gets created for each page object,
+which allows you to check whether or not it's being displayed in the browser.
+
+```ruby
+site.my_page? # Additional helper method created for each page class.
+=> true
+```
+
+*Note 2:* If you want to, you can disable automatic navigation by including the
+disable_automatic_navigation method when defining a page object class (see example
+below.)
+
+*Templated URLs and Support for Object Arguments*
+
+All URLs for page objects are defined using URL templates. For example, if you have an
+account details page that requires an account code you can define a page object that looks
+like this:
+
+```ruby
+class AccountDetailsPage < MySite::Page
+  set_url "/accounts/{account_code}" # Used for navigation and page matching (but see below.)
+end
+```
+
+And then you can use the page object in the following manner, providing a hash to fill in
+the templated values:
+
+```ruby
+site.account_details_page account_code: '5233543656575767'
+```
+
+Even better, if you have a Ruby object that responds to "account_code" you can just use
+that. The page object will try to get the page arguments it needs from the account
+object when it's initialized:
+
+```ruby
+site.account_details_page account
+```
+
+In the example above, the account argument can be anything as long as it has an
+account_code method.
+
+*Note:* Regardless of whether you are using a hash or some other object to initialize
+a page, if the object doesn't respond to an argument required by the templated URL
+the page object will fall back to looking at the arguments used to initialize the site
+object. If it sees a match there it will use that argument to fill in the gaps when
+attempting to initialize the page. This allows you to specify things like a subdomain
+or a port number when initializing the site object and use them when defining URL
+templates for your page objects.
+
+*Overriding a URL Template for Navigation Purposes*
+For cases where the URL template may not be sufficient to match the final URL that's
+displayed, you can define a regular expression that overrides the template when the site
+object is looking at the browser URL to determine whether or not it's on a particular
+page:
+
+```ruby
+class AccountDetailsPage < MySite::Page
+  set_url "/accounts/{account_code}" # This will be used for all navigation.
+  set_url_matcher %r{/accounts/\d+$} # This will be used for all page matching.
+end
+
+```
+
+*Introspection*
+The site object knows about all of its pages and can tell what page it's on by looking
+at the URL that the browser's displaying:
+
+```ruby
+site.page
+=> <SomePage>
+```
+
+If the site object can't find a matching page for the URL then it will return nil:
+
+```ruby
+site.page
+=> nil
+```
+
+The site object takes this ability to identify the page that it's currently on one step
+further. If it gets a method call it doesn't recognize then it delegates the method
+call down to the page that it's currently on. This is really useful when dealing with
+multi-page workflows and makes the page objects themselves a lot less important:
+
+```ruby
+site.account_details_page account # Where account is an object that responds to account_code (see above.)
+site.edit_account.click # Method call is delegated to the account details page object.
+site.edit_account first_name: 'Bob' # Method call is delegated to the account edit page object.
+site.page # After the edit is completed the details page gets loaded again.
+=> <AccountDetailsPage>
+```
+
 Defining and Instantiating a Site Object
 ===============
 
