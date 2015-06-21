@@ -4,7 +4,7 @@ page objects don't provide. Works with Watir and Selenium.
 
 Features
 ===============
-*Easily Handle Multiple Test Environments*
+##Easily Handle Multiple Test Environments
 One pretty common problem for testers is writing automation that can be applied against
 multiple development environments. Site objects allow you to set a base URL when
 initializing a site and then specify relative URLs for all of your pages. This allows
@@ -12,7 +12,7 @@ you to define a different base URL at runtime based on the environment you want 
 run your tests against. You can also override the base URL on a per page basis if you
 need to.
 
-*Simpler Page Object Initialization and Navigation*
+##Simpler Page Object Initialization and Navigation
 Your browser library (Watir or Selenium) gets initialized at the site level. The site
 object stores a browser reference and automatically passes it down to a page object
 as it gets initialized. So there's no need to feed a page object a browser object every
@@ -50,7 +50,7 @@ site.my_page? # Additional helper method created for each page class.
 disable_automatic_navigation method when defining a page object class (see example
 below.)
 
-*Templated URLs and Support for Object Arguments*
+##Templated URLs and Support for Object Arguments
 
 All URLs for page objects are defined using URL templates. For example, if you have an
 account details page that requires an account code you can define a page object that looks
@@ -88,7 +88,7 @@ attempting to initialize the page. This allows you to specify things like a subd
 or a port number when initializing the site object and use them when defining URL
 templates for your page objects.
 
-*Overriding a URL Template for Navigation Purposes*
+##Overriding a URL Template for Navigation Purposes
 For cases where the URL template may not be sufficient to match the final URL that's
 displayed, you can define a regular expression that overrides the template when the site
 object is looking at the browser URL to determine whether or not it's on a particular
@@ -102,7 +102,7 @@ end
 
 ```
 
-*Introspection*
+##Introspection
 The site object knows about all of its pages and can tell what page it's on by looking
 at the URL that the browser's displaying:
 
