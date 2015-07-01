@@ -3,7 +3,6 @@ class ElementContainer
 
   def initialize(element)
     @element = element
-binding.pry
     @page    = parent.site.page
   end
 
