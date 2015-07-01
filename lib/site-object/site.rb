@@ -83,6 +83,12 @@ module SiteObject
     @pages.each do |current_page|
       current_page.set_url_template(@base_url)
 
+      if current_page.url_matcher
+        unless current_page.url_matcher.is_a? Regexp
+          raise SiteObject::PageConfigError, "A url_matcher was defined for the #{current_page} page but it was not a regular expression. Check the value provided to the set_url_matcher method in the class definition for this page. Object provided was a #{current_page.url_matcher.class.name}"
+        end
+      end
+
       self.class.class_eval do
         define_method(current_page.to_s.underscore) do |args={}, block=nil|
           current_page.new(self, args)

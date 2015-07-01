@@ -2,6 +2,9 @@ module SiteObjectExceptions
   class BrowserLibraryNotSupportedError < RuntimeError
   end
 
+  class PageConfigError                 < RuntimeError
+  end
+
   class PageInitError                   < RuntimeError
   end
 
