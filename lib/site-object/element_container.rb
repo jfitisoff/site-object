@@ -3,7 +3,6 @@ class ElementContainer
 
   def initialize(element)
     @element = element
-    @page    = parent.site.page
   end
 
   def method_missing(sym, *args, &block)
