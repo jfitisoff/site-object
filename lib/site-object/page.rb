@@ -286,7 +286,9 @@ module PageObject
 
       # Try to expand the URL template if the URL has parameters.
       @arguments = {}.with_indifferent_access # Stores the param list that will expand the url_template after examining the arguments used to initialize the page.
-      if @required_arguments.length > 0
+      if @required_arguments.length >  0 && !args
+        raise SiteObject::PageInitError, "No object was provided when attempting to initialize #{self.class.name}. This page object requires the following arguments for initialization: :#{@required_arguments.join(', :')}.\n\n#{caller.join("\n")}"
+      elsif @required_arguments.length > 0
         @required_arguments.each do |arg| # Try to extract each URL argument from the hash or object provided, OR from the site object.
           if args.is_a?(Hash) && !args.empty?
             if args.with_indifferent_access[arg] #The hash has the required argument.
@@ -296,8 +298,6 @@ module PageObject
             else
               raise SiteObject::PageInitError, "#{args.class} was provided, but this object did not respond to :#{arg}, which is necessary to build an URL for the #{self.class.name} page.\n\n#{caller.join("\n")}"
             end
-          # elsif args.is_a?(Hash) && args.empty?
-          #   raise SiteObject::PageInitError, "An attempt to initialize the #{self.class.name} page object failed because no page arguments were provided. This page object requires the following arguments for initialization: :#{@required_arguments.join(", :")}\n\n#{caller.join("\n")}."
           elsif args # Some non-hash object was provided.
             if args.respond_to?(arg) #The hash has the required argument.
               @arguments[arg]= args.send(arg)
@@ -310,10 +310,8 @@ module PageObject
             # Do nothing here.
           end
         end
-      elsif @required_arguments.length >  0 && !args
-        raise SiteObject::PageInitError, "No object was provided when attempting to initialize #{self.class.name}. This page object requires the following arguments for initialization: :#{@required_arguments.join(', :')}.\n\n#{caller.join("\n")}"
-      elsif @required_arguments.length == 0 && !args
-        unless @args.is_a?(Hash) && args.empty?
+      elsif @required_arguments.length == 0 && args # If there are no required arguments.
+        unless args.is_a?(Hash) && args.empty?     # Do this unless args is an empty hash.
           raise SiteObject::PageInitError, "#{args.class} was provided as a #{self.class.name} initialization argument, but the page URL doesn't require any arguments.\n\n#{caller.join("\n")}"
         end
       else
@@ -378,7 +376,12 @@ module PageObject
     # It's better to use the default URL matching if possible. But if for some reason it's not feasible
     # you can use the alternate method to specify how to match the page.
     def on_page?
-      url = @browser.url    
+      if @url_template.pattern =~ /#/ # It has a URL fragment. Don't mess with the browser URL.
+        url = @browser.url
+      else # There's no fragment in the URL template, strip the fragment out of the URL so that template matching works better.
+        url = @browser.url.split('#')[0]
+      end
+
       if @url_matcher && @url_matcher =~ url
         return true
       elsif @url_template.match(url)
@@ -395,7 +398,7 @@ module PageObject
     end
 
     # Refreshes the page.
-    def refresh # TODO: Isolate browser library-specific code so that the adding new browser
+    def refresh # TODO: Isolate browser library-specific code so that the adding a new browser library is cleaner.
       if @browser.is_a?(Watir::Browser)
         @browser.refresh
       elsif @browser.is_a?(Selenium::WebDriver::Driver)

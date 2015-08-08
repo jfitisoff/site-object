@@ -178,11 +178,8 @@ module SiteObject
   #  s = SomeSite.new(hash)
   #  s.open_browser :watir, :firefox
   def open_browser(platform, browser_type, args={})
-    # puts "howdy"
-    # binding.pry
     case platform
     when :watir
-      # binding.pry
       @browser = Watir::Browser.new(browser_type, args)
     when :selenium
       @browser = Selenium::WebDriver::Driver.for(browser_type, args)
