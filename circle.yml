@@ -3,4 +3,4 @@ machine:
     version: 2.2.3
 test:
   post:
-    - bundle exec rspec tests/unit_tests.rb -f html -o test_report.html
+    - bundle exec rspec tests/unit_tests.rb -f html -o $CIRCLE_ARTIFACTS/test_report.html
