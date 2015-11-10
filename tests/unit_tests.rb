@@ -1,3 +1,5 @@
+require 'watir'
+
 describe "POC" do
   before(:all) do
     @b = Watir::Browser.new
