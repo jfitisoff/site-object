@@ -4,6 +4,7 @@
 require 'site-object'
 require 'watir-webdriver'
 require 'rspec'
+require 'rspec_junit_formatter'
 
 # The site object for ruby-lang.org.
 class RubyLangSite
