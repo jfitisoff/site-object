@@ -9,7 +9,8 @@ describe "https://ruby-lang.org" do
   end
 
   after(:all) do
-  @site.browser.close
+    @site.browser.close
+  end
 
   describe "Landing Page:" do
 
