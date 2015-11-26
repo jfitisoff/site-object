@@ -62,14 +62,10 @@
 module PageObject
 
   module PageClassMethods
-    attr_reader :arguments, :browser, :navigation_disabled, :page_elements, :page_features, :page_url, :site, :unique_methods, :url_template, :url_matcher
+    cattr_accessor :page_features # Page features should be inheritable so that page templates work.
+    attr_reader    :page_attributes, :page_elements, :page_url, :url_template, :url_matcher
 
-    # Looks up all of the descendants of the current class. Used to figure out which page object classes
-    # belong to the site.
-    def descendants
-      ObjectSpace.each_object(Class).select { |klass| klass < self }
-    end
-
+    # DEPRECATED. Use the set_attributes method instead.
     # This method can be used to disable page navigation when defining a page class (it sets an
     # instance variable called @navigation during initialization.) The use case for this is a page
     # that can't be accessed directly and requires some level of browser interaction to reach.
@@ -85,6 +81,9 @@ module PageObject
     # If the visit method is called on the page a SiteObject::PageNavigationNotAllowedError
     # will be raised.
     def disable_automatic_navigation
+      puts "DEPRECATED. Will be removed in a future release. Use the set_attributes method in place of this one. See documentation for more details."
+      @page_attributes ||= []
+      @page_attributes << :navigation_disabled
       @navigation_disabled = true
     end
 
@@ -116,6 +115,54 @@ module PageObject
       end
     end
     alias :el :element
+
+    # Allows you to set special page attributes that affect page behavior. The two page
+    # attributes currently supported are :navigation_disabled and :page_template:
+    #
+    # * When :navigation_disabled is specified as a page attribute, all automatic and
+    #   manual browser navigation is disabled. If you call the page's page methods
+    #   automatic navigation is turned off -- it won't automatically load the page for
+    #   you. And it the method will raise a PageNavigationNotAllowedError if you call
+    #   the page's accessor method while you aren't actually on the page. And finally,
+    #   the page's visit method is disabled. This attribute is useful only when you
+    #   have a page that can't be automatically navigated to, in which case all of
+    #   the navigation features described above wouldn't work anyway.
+    #
+    # * When :page_template is specified as a page attribute, the site object won't
+    #   create an accessor method for the page when initializing and also won't include
+    #   the page when calling the site object's pages method. This allows you to define
+    #   a page object for inheritance purposes only. The idea behind this is to put common
+    #   features one or more of these templates, which won't get used directly. Then your
+    #   other page objects that you actually do want to use can inherit from one of the
+    #   templates, gaining all of its features. For example, you can put things like a
+    #   logout link or common menus into a template and then have all of the page objects
+    #   that need those features inherit from the template and get those features
+    #   automatically.
+    #
+    # If an unsupported attribute is specified a PageConfigError will be raised.
+    #
+    # Usage:
+    #  set_attributes :attr1, :attr2
+    def set_attributes(*args)
+      @page_attributes ||= []
+      args.each do |arg|
+        case arg
+        when :navigation_disabled
+          @navigation_disabled = true
+        when :page_template
+          @page_template = true
+        else
+          raise SiteObject::PageConfigError, "Unsupported page attribute argument: #{arg} for #{self} page definition. Argument class: #{arg.class}. Arguments must be one or more of the following symbols: :navigation_disabled, :template."
+        end
+      end
+
+      @page_attributes = args
+    end
+
+    def page_template?
+      @page_attributes ||= []
+      @page_attributes.include? :page_template
+    end
 
     # Returns an array of symbols representing the required arguments for the page's page URL.
     def required_arguments
@@ -255,12 +302,16 @@ module PageObject
     #
     # Use the PageFeature class to define page features.
     def use_features(*args)
-      @page_features = args
+      if self.page_features
+        args.each { |feature| self.page_features << feature }
+      else
+        self.page_features = args
+      end
     end
   end
 
   module PageInstanceMethods
-    attr_reader :arguments, :browser, :navigation_disabled, :page_elements, :page_features, :page_url, :required_arguments, :site, :url_template, :url_matcher
+    attr_reader :arguments, :browser, :page_attributes, :page_elements, :page_features, :page_url, :required_arguments, :site, :url_template, :url_matcher
 
     # Takes the name of a page class. If the current page is of that class then it returns a page
     # object for the page. Raises a SiteObject::WrongPageError if that's not the case.
@@ -275,7 +326,7 @@ module PageObject
     # handle all of this for you.
     def initialize(site, args={})
       @browser = site.browser
-      @navigation_disabled = self.class.navigation_disabled
+      @page_attributes = self.class.page_attributes
       @page_url = self.class.page_url
       @page_elements = self.class.page_elements
       @page_features = self.class.page_features
@@ -318,7 +369,6 @@ module PageObject
         # Do nothing here.
       end
       @url = @url_template.expand(@arguments).to_s
-
       @page_features ||= []
       @page_features.each do |arg|
         self.class_eval do
@@ -337,7 +387,7 @@ module PageObject
 
       @site.most_recent_page = self
       unless on_page?
-        if @navigation_disabled
+        if navigation_disabled?
           if page = @site.page
             raise SiteObject::PageNavigationNotAllowedError, "The #{self.class.name} page could not be accessed. Navigation is intentionally disabled for this page and the browser was displaying the #{@site.page.class.name} page when you tried to access it.\n\nPAGE URL:\n------------\n#{@site.browser.url}\n\n#{caller.join("\n")}"
           else
@@ -397,6 +447,10 @@ module PageObject
       false
     end
 
+    def navigation_disabled?
+      @page_attributes.include? :navigation_disabled
+    end
+
     # Refreshes the page.
     def refresh # TODO: Isolate browser library-specific code so that the adding a new browser library is cleaner.
       if @browser.is_a?(Watir::Browser)
@@ -413,7 +467,7 @@ module PageObject
     # navigation has been disabled for the page. Raises a SiteObject::WrongPageError if the
     # specified page isn't getting displayed after navigation.
     def visit
-      if @navigation_disabled
+      if navigation_disabled?
         raise SiteObject::PageNavigationNotAllowedError, "Navigation has been disabled for the #{self.class.name} page. This was done when defining the page class and usually means that the page can't be reached directly through a URL and requires some additional work to access."
       end
       if @browser.is_a?(Watir::Browser)

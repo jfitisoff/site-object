@@ -77,25 +77,27 @@ module SiteObject
     @arguments   = args.with_indifferent_access
     @base_url    = @arguments[:base_url]
     @browser     = @arguments[:browser]
-    @pages       = self.class::Page.descendants
+    @pages       = self.class::Page.descendants.reject { |p| p.page_template? }
 
     # Set up accessor methods for each page and page checking methods..
     @pages.each do |current_page|
-      current_page.set_url_template(@base_url)
+      unless current_page.page_template?
+        current_page.set_url_template(@base_url)
 
-      if current_page.url_matcher
-        unless current_page.url_matcher.is_a? Regexp
-          raise SiteObject::PageConfigError, "A url_matcher was defined for the #{current_page} page but it was not a regular expression. Check the value provided to the set_url_matcher method in the class definition for this page. Object provided was a #{current_page.url_matcher.class.name}"
-        end
-      end
-
-      self.class.class_eval do
-        define_method(current_page.to_s.underscore) do |args={}, block=nil|
-          current_page.new(self, args)
+        if current_page.url_matcher
+          unless current_page.url_matcher.is_a? Regexp
+            raise SiteObject::PageConfigError, "A url_matcher was defined for the #{current_page} page but it was not a regular expression. Check the value provided to the set_url_matcher method in the class definition for this page. Object provided was a #{current_page.url_matcher.class.name}"
+          end
         end
 
-        define_method("#{current_page.to_s.underscore}?") do
-          on_page? current_page
+        self.class.class_eval do
+          define_method(current_page.to_s.underscore) do |args={}, block=nil|
+            current_page.new(self, args)
+          end
+
+          define_method("#{current_page.to_s.underscore}?") do
+            on_page? current_page
+          end
         end
       end
     end
