@@ -129,7 +129,7 @@ site.some_page.logout.click
 # The page template itself won't be accessible though. No accessor method is created
 # for it on the site object (because it's a template for other pages.):
 site.some_template
-NoMethodError: undefined method `some_template' for #<SomeSite:0x007f9550d24d98>
+NoMethodError: undefined method 'some_template' for <SomeSite:0x007f9550d24d98>
 
 # And if you ask a site about its pages the page object template won't be included:
 site.pages
