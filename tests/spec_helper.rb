@@ -4,7 +4,7 @@
 require 'site-object'
 require 'watir-webdriver'
 require 'rspec'
-require 'rspec_junit_formatter'
+# require 'rspec_junit_formatter'
 
 # The site object for ruby-lang.org.
 class RubyLangSite
@@ -39,16 +39,24 @@ class FooterBar < PageFeature
   end
 end
 
+# This is just a container class to store common features. The other classes below
+# inherit this template to get the features. Because this class is defined as a
+# page template there will be no accessor method for it on the site object.
+class RubyLangTemplate < RubyLangSite::Page
+  set_attributes :page_template # Page template, so no accessor method for this page
+  use_features   :header_bar, :footer_bar
+end
+
 # Models the page that users first see when they access the site. The landing page will
 # display summaries of the four most recent news posts. You can click on these summaries to
 # drill down to a page that contains the complete news post. The landing page also has links
 # to navigate to the news page, which has a larger selection of news posts (the last ten
 # most recent posts.)
-class LandingPage < RubyLangSite::Page
+class LandingPage < RubyLangTemplate
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL
   # matcher isn't provided.)
   set_url "/{language}/"
-  use_features :header_bar, :footer_bar # See HeaderBar and FooterBar defined above.
+  # use_features :header_bar, :footer_bar # See HeaderBar and FooterBar defined above.
 
   # Create a method that takes all of the landing page post divs and wrap some more
   # functionality around them. Also see PostSummary class above.
@@ -59,11 +67,11 @@ end
 
 # Models the news page, which shows summaries of the last ten most recent posts. The user
 # can drill down on these summaries to read the full story.
-class NewsPage < RubyLangSite::Page
+class NewsPage < RubyLangTemplate
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL
   # matcher isn't provided.) See HeaderBar and FooterBar page features defined above.
   set_url "/{language}/news/"
-  use_features :header_bar, :footer_bar
+  # use_features :header_bar, :footer_bar
 
   # Returns all post summary divs with a little extra functionality wrapped around them.
   def posts
@@ -73,10 +81,10 @@ end
 
 # This page hosts a single, complete, news post. Users get to it by drilling down on
 # summaries on the landing page or the news page.
-class NewsPostPage < RubyLangSite::Page
-  set_url_matcher  %r{/en/news/\d+/\d+/\d+/\S+/} #
-  disable_automatic_navigation
-  use_features :header_bar, :footer_bar
+class NewsPostPage < RubyLangTemplate
+  set_url_matcher %r{/en/news/\d+/\d+/\d+/\S+/} #
+  set_attributes  :navigation_disabled
+  # use_features    :header_bar, :footer_bar
 
   element(:post) { |b| Post.new(b.div(:id, 'content-wrapper')) }
 end
