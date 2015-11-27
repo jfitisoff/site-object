@@ -1,4 +1,7 @@
 # site-object
+[![Gem Version](https://badge.fury.io/rb/site-object.svg)](https://rubygems.org/gems/site-object)
+[![Build Status](https://circleci.com/gh/jfitisoff/site-object.svg?style=shield)](https://circleci.com/gh/jfitisoff/site-object)
+
 Wraps page objects up into a site object, which provides some introspection and
 navigation capabilities page objects don't provide. Works with Watir and Selenium.
 
