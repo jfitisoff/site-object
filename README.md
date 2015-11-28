@@ -294,7 +294,6 @@ implementation doesn't require a driver library.
 require 'site-object'
 require 'watir-webdriver'
 require 'rspec'
-# require 'rspec_junit_formatter'
 
 # The site object for ruby-lang.org.
 class RubyLangSite
@@ -331,7 +330,7 @@ end
 
 class RubyLangTemplate < RubyLangSite::Page
   set_attributes :page_template
-  use_features   :header_bar, :footer_bar
+  use_features   :header_bar, :footer_bar # See HeaderBar and FooterBar defined above.
 end
 
 # Models the page that users first see when they access the site. The landing page will

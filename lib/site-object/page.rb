@@ -264,17 +264,13 @@ module PageObject
     end
 
     def set_url_template(base_url)
-      begin
-        case @page_url.to_s
-        when '' # There's no page URL so just assume the base URL
-          @url_template = Addressable::Template.new(base_url)
-        when /(http:\/\/|https:\/\/)/i
-          @url_template = Addressable::Template.new(@page_url)
-        else
-          @url_template = Addressable::Template.new(Addressable::URI.parse("#{base_url}#{@page_url}"))
-        end
-      rescue Addressable::URI::InvalidURIError => e
-        raise SiteObject::PageInitError, "Unable to initialize #{self.class} because there's no base_url defined for the site and the page object URL that was defined was a URL fragment (#{@page_url})\n\n#{caller.join("\n")}"
+      case @page_url
+      when '' # There's no page URL so just assume the base URL
+        @url_template = Addressable::Template.new(base_url)
+      when /(http:\/\/|https:\/\/)/i
+        @url_template = Addressable::Template.new(@page_url)
+      else
+        @url_template = Addressable::Template.new(Addressable::URI.parse("#{base_url}#{@page_url}"))
       end
     end
 
@@ -324,7 +320,7 @@ module PageObject
     # There's no need to ever call this directly. Initializes a page object within the context of a
     # site object. Takes a site object and a hash of configuration arguments. The site object will
     # handle all of this for you.
-    def initialize(site, args={})
+    def initialize(site, args)
       @browser = site.browser
       @page_attributes = self.class.page_attributes
       @page_url = self.class.page_url
@@ -337,13 +333,15 @@ module PageObject
 
       # Try to expand the URL template if the URL has parameters.
       @arguments = {}.with_indifferent_access # Stores the param list that will expand the url_template after examining the arguments used to initialize the page.
-      if @required_arguments.length >  0 && !args
-        raise SiteObject::PageInitError, "No object was provided when attempting to initialize #{self.class.name}. This page object requires the following arguments for initialization: :#{@required_arguments.join(', :')}.\n\n#{caller.join("\n")}"
-      elsif @required_arguments.length > 0
+      if @required_arguments.present? 0 && !args
+        raise SiteObject::PageInitError, "No arguments provided when attempting to initialize #{self.class.name} (). This page object requires the following arguments for initialization: :#{@required_arguments.join(', :')}.\n\n#{caller.join("\n")}"
+      elsif @required_arguments.present?
         @required_arguments.each do |arg| # Try to extract each URL argument from the hash or object provided, OR from the site object.
-          if args.is_a?(Hash) && !args.empty?
-            if args.with_indifferent_access[arg] #The hash has the required argument.
-              @arguments[arg]= args.with_indifferent_access[arg]
+          if args.is_a?(Hash) && args.present?
+            args = args.with_indifferent_access
+
+            if args[arg] #The hash has the required argument.
+              @arguments[arg]= args[arg]
             elsif @site.respond_to?(arg)
               @arguments[arg]= site.send(arg)
             else
@@ -361,10 +359,8 @@ module PageObject
             # Do nothing here.
           end
         end
-      elsif @required_arguments.length == 0 && args # If there are no required arguments.
-        unless args.is_a?(Hash) && args.empty?     # Do this unless args is an empty hash.
-          raise SiteObject::PageInitError, "#{args.class} was provided as a #{self.class.name} initialization argument, but the page URL doesn't require any arguments.\n\n#{caller.join("\n")}"
-        end
+      elsif @required_arguments.empty? && args # If there are no required arguments then nothing should be provided.
+        raise SiteObject::PageInitError, "#{args.class} was provided as a #{self.class.name} initialization argument, but the page URL doesn't require any arguments.\n\n#{caller.join("\n")}"
       else
         # Do nothing here.
       end

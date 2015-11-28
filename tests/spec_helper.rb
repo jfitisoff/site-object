@@ -44,7 +44,7 @@ end
 # page template there will be no accessor method for it on the site object.
 class RubyLangTemplate < RubyLangSite::Page
   set_attributes :page_template # Page template, so no accessor method for this page
-  use_features   :header_bar, :footer_bar
+  use_features   :header_bar, :footer_bar # See HeaderBar and FooterBar defined above.
 end
 
 # Models the page that users first see when they access the site. The landing page will
@@ -71,7 +71,6 @@ class NewsPage < RubyLangTemplate
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL
   # matcher isn't provided.) See HeaderBar and FooterBar page features defined above.
   set_url "/{language}/news/"
-  # use_features :header_bar, :footer_bar
 
   # Returns all post summary divs with a little extra functionality wrapped around them.
   def posts
@@ -87,6 +86,21 @@ class NewsPostPage < RubyLangTemplate
   # use_features    :header_bar, :footer_bar
 
   element(:post) { |b| Post.new(b.div(:id, 'content-wrapper')) }
+end
+
+class AliasedFeature < PageFeature
+  feature_name :aliased_feature_name
+end
+
+class TestingPage < RubyLangTemplate
+  use_features :aliased_feature
+  set_url "/{language}/"
+
+  element(:foo) { |b| b.text_field(:id, 'bogus') }
+end
+
+class TestingPageNavDisabled < RubyLangTemplate
+  set_url "/{language}/"
 end
 
 # An element container class. This class adds a little bit of functionality to the
