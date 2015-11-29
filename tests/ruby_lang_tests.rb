@@ -76,6 +76,11 @@ end
 describe "Page Object" do
 
   before(:all) do
+    @github = GithubSite.new(
+      base_url: 'https://github.com/',
+      browser:  Watir::Browser.new
+    )
+
     @site = RubyLangSite.new(Watir::Browser.new, "en")
   end
 
@@ -85,6 +90,7 @@ describe "Page Object" do
 
   after(:all) do
     @site.close_browser
+    @github.close_browser
   end
 
   it "disables automatic navigation the old way" do
@@ -196,8 +202,8 @@ describe "Page Object" do
   end
 
   it "handles an empty page_url" do
-    @site.testing_page_empty_url
-    expect(@site.testing_page_empty_url?).to be_truthy
+    @github.testing_page_empty_url
+    expect(@github.testing_page_empty_url?).to be_truthy
   end
 
   it "handles a fully qualified page_url" do

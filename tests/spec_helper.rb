@@ -160,14 +160,9 @@ class TestingPageBadMatcher < RubyLangTemplate
   set_url_matcher /invalid/
 end
 
-class TestingPageEmptyURL < RubyLangTemplate
-  set_url ''
-  set_url_matcher /.*/
-end
-
 class TestingPageFullURL < RubyLangTemplate
-  set_url "/{language}/"
-  set_url_matcher /.*/
+  set_url "https://rubygems.org"
+  set_url_matcher /rubygems.org/
 end
 
 class BadSite
@@ -186,7 +181,16 @@ class GoogleSite
   include SiteObject
 end
 
-class SearchPage < GoogleSite::Page
+class GithubSite
+  include SiteObject
+end
+
+class ExplorePage < GithubSite::Page
+  set_url '/explore'
+end
+
+class TestingPageEmptyURL < GithubSite::Page
+  set_url ''
 end
 
 class Lang
