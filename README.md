@@ -1,6 +1,7 @@
 # site-object
 [![Gem Version](https://badge.fury.io/rb/site-object.svg)](https://rubygems.org/gems/site-object)
 [![Build Status](https://circleci.com/gh/jfitisoff/site-object.svg?style=shield)](https://circleci.com/gh/jfitisoff/site-object)
+[![Coverage Status](https://coveralls.io/repos/jfitisoff/site-object/badge.svg?nocache)](https://coveralls.io/r/jfitisoff/site-object)
 
 Wraps page objects up into a site object, which provides some introspection and
 navigation capabilities page objects don't provide. Works with Watir and Selenium.
@@ -132,7 +133,7 @@ site.some_page.logout.click
 # The page template itself won't be accessible though. No accessor method is created
 # for it on the site object (because it's a template for other pages.):
 site.some_template
-NoMethodError: undefined method 'some_template' for <SomeSite:0x007f9550d24d98>
+NoMethodError: undefined method `some_template' for #<SomeSite:0x007f9550d24d98>
 
 # And if you ask a site about its pages the page object template won't be included:
 site.pages
@@ -297,7 +298,6 @@ implementation doesn't require a driver library.
 require 'site-object'
 require 'watir-webdriver'
 require 'rspec'
-# require 'rspec_junit_formatter'
 
 # The site object for ruby-lang.org.
 class RubyLangSite
@@ -334,7 +334,7 @@ end
 
 class RubyLangTemplate < RubyLangSite::Page
   set_attributes :page_template
-  use_features   :header_bar, :footer_bar
+  use_features   :header_bar, :footer_bar # See HeaderBar and FooterBar defined above.
 end
 
 # Models the page that users first see when they access the site. The landing page will

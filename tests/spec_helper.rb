@@ -57,7 +57,7 @@ end
 # page template there will be no accessor method for it on the site object.
 class RubyLangTemplate < RubyLangSite::Page
   set_attributes :page_template # Page template, so no accessor method for this page
-  use_features   :header_bar, :footer_bar
+  use_features   :header_bar, :footer_bar # See HeaderBar and FooterBar defined above.
 end
 
 # Models the page that users first see when they access the site. The landing page will
@@ -76,6 +76,23 @@ class LandingPage < RubyLangTemplate
   def posts
     @browser.divs(:class, 'post').map { |div| PostSummary.new(div) }
   end
+
+  def args_and_block(*args, &block)
+    __method__
+  end
+
+  def args_only(*args)
+    __method__
+  end
+
+  def block_only(&block)
+    __method__
+  end
+
+  def method_only
+    __method__
+  end
+
 end
 
 # Models the news page, which shows summaries of the last ten most recent posts. The user
@@ -84,7 +101,7 @@ class NewsPage < RubyLangTemplate
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL
   # matcher isn't provided.) See HeaderBar and FooterBar page features defined above.
   set_url "/{language}/news/"
-  # use_features :header_bar, :footer_bar
+  set_url_matcher /\S+\/news\/$/
 
   # Returns all post summary divs with a little extra functionality wrapped around them.
   def posts
@@ -95,11 +112,96 @@ end
 # This page hosts a single, complete, news post. Users get to it by drilling down on
 # summaries on the landing page or the news page.
 class NewsPostPage < RubyLangTemplate
-  set_url_matcher %r{/en/news/\d+/\d+/\d+/\S+/} #
+  set_url_matcher %r{/\S{2}/news/\d+/\d+/\d+/\S+/} #
   set_attributes  :navigation_disabled
   # use_features    :header_bar, :footer_bar
 
   element(:post) { |b| Post.new(b.div(:id, 'content-wrapper')) }
+end
+
+class AliasedFeature < PageFeature
+  feature_name :aliased_feature_name
+end
+
+class TestingPage < RubyLangTemplate
+  use_features :aliased_feature
+  set_url "/{language}/"
+
+  element(:foo) { |b| b.text_field(:id, 'bogus') }
+end
+
+class FooAttrPage < RubyLangTemplate
+  set_url "/{language}/{foo}"
+end
+
+class NoAttrPage < RubyLangTemplate
+  set_url "/en/"
+end
+
+class TestingPageNavDisabledOld < RubyLangTemplate
+  disable_automatic_navigation
+  set_url "/{language}/"
+end
+
+class TestingPageNavDisabledNew < RubyLangTemplate
+  set_attributes :navigation_disabled
+  set_url "/{language}/"
+end
+
+class TestingPageNoArgs < RubyLangTemplate
+  set_url "/en/"
+end
+
+class TestingPageHasFrag < RubyLangTemplate
+  set_url "/en/#/frag"
+end
+
+class TestingPageBadMatcher < RubyLangTemplate
+  set_url_matcher /invalid/
+end
+
+class TestingPageFullURL < RubyLangTemplate
+  set_url "https://rubygems.org"
+  set_url_matcher /rubygems.org/
+end
+
+class BadSite
+  include SiteObject
+end
+
+class BadPage < BadSite::Page
+  set_url_matcher 'invalid'
+end
+
+class EmptySite
+  include SiteObject
+end
+
+class GoogleSite
+  include SiteObject
+end
+
+class SearchPage < GoogleSite::Page
+end
+
+class GithubSite
+  include SiteObject
+end
+
+class ExplorePage < GithubSite::Page
+  set_url '/explore'
+end
+
+class TestingPageEmptyURL < GithubSite::Page
+  set_url ''
+end
+
+class Lang
+  attr_accessor :language
+
+  def initialize(language)
+    @language = language
+  end
 end
 
 # An element container class. This class adds a little bit of functionality to the

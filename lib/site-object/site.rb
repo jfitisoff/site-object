@@ -7,8 +7,6 @@ module SiteObject
   attr_reader :base_url, :unique_methods
   attr_accessor :pages, :browser, :arguments, :most_recent_page
 
-  include SiteObjectExceptions
-
   # Sets up a Page class when the SiteObject module is included in the class you're using to model
   # your site.
   def self.included(base)
@@ -91,7 +89,7 @@ module SiteObject
         end
 
         self.class.class_eval do
-          define_method(current_page.to_s.underscore) do |args={}, block=nil|
+          define_method(current_page.to_s.underscore) do |args=nil, block=nil|
             current_page.new(self, args)
           end
 
@@ -164,7 +162,13 @@ module SiteObject
   #  site.on_page? AccountSummaryPage
   #  =>true
   def on_page?(page_arg)
-    url = @browser.url
+    if @browser.is_a? Watir::Browser
+      url = @browser.url
+    elsif @browser.is_a? Selenium::WebDriver::Driver
+      url = @browser.current_url
+    else
+      raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+    end
 
     if page_arg.url_matcher && page_arg.url_matcher =~ url
       return true
@@ -197,13 +201,19 @@ module SiteObject
   def page
     return @most_recent_page if @most_recent_page && @most_recent_page.on_page?
 
-    url = @browser.url
-    found_page = nil
+    if @browser.is_a? Watir::Browser
+      url = @browser.url
+    elsif @browser.is_a? Selenium::WebDriver::Driver
+      url = @browser.current_url
+    else
+      raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+    end
 
+    found_page = nil
     @pages.each do |p|
-      if p.url_template.match url
+      if p.url_matcher && p.url_matcher =~ url
         found_page = p
-      elsif p.url_matcher && p.url_matcher =~ url
+      elsif p.url_template.match url
         found_page = p
       end
 
