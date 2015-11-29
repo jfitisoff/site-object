@@ -162,7 +162,13 @@ module SiteObject
   #  site.on_page? AccountSummaryPage
   #  =>true
   def on_page?(page_arg)
-    url = @browser.url
+    if @browser.is_a? Watir::Browser
+      url = @browser.url
+    elsif @browser.is_a? Selenium::WebDriver::Driver
+      url = @browser.current_url
+    else
+      raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+    end
 
     if page_arg.url_matcher && page_arg.url_matcher =~ url
       return true
@@ -195,9 +201,15 @@ module SiteObject
   def page
     return @most_recent_page if @most_recent_page && @most_recent_page.on_page?
 
-    url = @browser.url
-    found_page = nil
+    if @browser.is_a? Watir::Browser
+      url = @browser.url
+    elsif @browser.is_a? Selenium::WebDriver::Driver
+      url = @browser.current_url
+    else
+      raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+    end
 
+    found_page = nil
     @pages.each do |p|
       if p.url_matcher && p.url_matcher =~ url
         found_page = p

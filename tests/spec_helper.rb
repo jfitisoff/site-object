@@ -181,6 +181,9 @@ class GoogleSite
   include SiteObject
 end
 
+class SearchPage < GoogleSite::Page
+end
+
 class GithubSite
   include SiteObject
 end

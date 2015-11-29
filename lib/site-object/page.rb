@@ -424,9 +424,21 @@ module PageObject
     # you can use the alternate method to specify how to match the page.
     def on_page?
       if @url_template.pattern =~ /#/ # It has a URL fragment. Don't mess with the browser URL.
-        url = @browser.url
+        if @browser.is_a? Watir::Browser
+          url = @browser.url
+        elsif @browser.is_a? Selenium::WebDriver::Driver
+          url = @browser.current_url
+        else
+          raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+        end
       else # There's no fragment in the URL template, strip the fragment out of the URL so that template matching works better.
-        url = @browser.url.split('#')[0]
+        if @browser.is_a? Watir::Browser
+          url = @browser.url.split('#')[0]
+        elsif @browser.is_a? Selenium::WebDriver::Driver
+          url = @browser.current_url.split('#')[0]
+        else
+          raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+        end
       end
 
       if @url_matcher && @url_matcher =~ url

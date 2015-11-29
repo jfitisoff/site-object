@@ -98,6 +98,14 @@ describe "Page Object" do
     expect { @site.testing_page_nav_disabled_old }.to raise_error SiteObject::PageNavigationNotAllowedError
   end
 
+  it "raises when the visit method is called on a page that does not allow navigation" do
+    @site.news_page.posts.first.post_title.click
+    expect(@site.news_post_page?).to be_truthy
+    p = @site.page
+    @site.news_page
+    expect { p.visit }.to raise_error SiteObject::PageNavigationNotAllowedError
+  end
+
   it "raises a PageConfigError when an invalid page attribute is defined" do
     klass = Class.new(RubyLangSite::Page)
     expect { klass.send(:set_attributes, :bar) }.to raise_error SiteObject::PageConfigError
@@ -162,6 +170,7 @@ describe "Page Object" do
 
   it "doesn't raise when expect_page is called and current page matches" do
    p = @site.landing_page
+   expect(p.expect_page LandingPage).to be_truthy
    expect(@site.expect_page(LandingPage)).to be_truthy
    expect(@site.expect_page(p)).to be_truthy
    expect(@site.expect_page(:landing_page)).to be_truthy
@@ -289,32 +298,76 @@ describe "Site Object Browser Management" do
 
   context "Watir" do
     before(:all) do
-      @site = GoogleSite.new(base_url: 'https://google.com')
+      @watir = GoogleSite.new(base_url: 'https://www.google.com/')
     end
 
     it "opens a browser" do
-      @site.open_browser(:watir, :firefox)
-      expect(@site.browser).to be_instance_of Watir::Browser
+      @watir.open_browser(:watir, :firefox)
+      expect(@watir.browser).to be_instance_of Watir::Browser
+    end
+
+    it "visits a page" do
+      expect { @watir.search_page.visit }.to_not raise_error
+    end
+
+    it "refreshes a browser" do
+      expect { @watir.search_page.refresh }.to_not raise_error
     end
 
     it "closes a browser" do
-      @site.browser.close
-      expect(@site.browser.exists?).to be_falsey
+      @watir.browser.close
+      expect(@watir.browser.exists?).to be_falsey
     end
   end
 
   context "Selenium" do
-   before(:all) do
-     @site = GoogleSite.new(base_url: 'https://google.com')
-   end
+    before(:all) do
+      @selenium = GoogleSite.new(base_url: 'https://www.google.com/')
+    end
 
-   it "opens a browser" do
-     @site.open_browser(:selenium, :firefox)
-     expect(@site.browser).to be_instance_of Selenium::WebDriver::Driver
-   end
+    it "opens a browser" do
+      @selenium.open_browser(:selenium, :firefox)
+      expect(@selenium.browser).to be_instance_of Selenium::WebDriver::Driver
+    end
 
-   it "closes a browser" do
-     expect { @site.browser.close }.to_not raise_error
-   end
- end
+    it "visits a page" do
+      expect { @selenium.search_page.visit }.to_not raise_error
+    end
+
+    it "refreshes a browser" do
+      expect { @selenium.search_page.refresh }.to_not raise_error
+    end
+
+    it "closes a browser" do
+      expect { @selenium.browser.close }.to_not raise_error
+    end
+  end
+
+  context "Unknown Browser Library" do
+    before(:all) do
+      @unknown = GoogleSite.new(base_url: 'https://www.google.com/')
+    end
+
+    after(:each) do
+      @unknown.close_browser if @unknown.browser
+    end
+
+    it "won't open a browser when it's not an expected browser object" do
+      expect { @unknown.open_browser(:invalid, :firefox) }.to raise_error SiteObject::BrowserLibraryNotSupportedError
+    end
+
+    it "won't visit a page when the page's browser object isn't an expected variety" do
+      @unknown.open_browser(:watir, :firefox)
+      p = @unknown.search_page
+      p.instance_variable_set :@browser, nil
+      expect { p.visit }.to raise_error SiteObject::BrowserLibraryNotSupportedError
+    end
+
+    it "won't refresh a page when the page's browser object isn't an expected variety" do
+      @unknown.open_browser(:watir, :firefox)
+      p = @unknown.search_page
+      p.instance_variable_set :@browser, nil
+      expect { p.refresh }.to raise_error SiteObject::BrowserLibraryNotSupportedError
+    end
+  end
 end
