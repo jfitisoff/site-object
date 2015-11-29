@@ -69,6 +69,7 @@ describe "site-object" do
 
   end
 
+end
 # Initial stab at getting code coverage to 100%. Just doing the bare minimum right
 # now, know that the code isn't organized the way you'd want to ti be. That'll
 # come later.

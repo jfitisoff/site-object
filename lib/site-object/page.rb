@@ -81,7 +81,7 @@ module PageObject
     # If the visit method is called on the page a SiteObject::PageNavigationNotAllowedError
     # will be raised.
     def disable_automatic_navigation
-      puts "The disable_automatic_navigation is deprecated and will be removed in a future release. Use the set_attributes method in place of this one in the class definition. See documentation for more details."
+      puts "The disable_automatic_navigation method is deprecated and will be removed in a future release. Use the set_attributes method in place of this one in the class definition. See documentation for more details."
       @page_attributes ||= []
       @page_attributes << :navigation_disabled
       @navigation_disabled = true
