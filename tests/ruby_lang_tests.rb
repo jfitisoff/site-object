@@ -84,7 +84,7 @@ describe "Page Object" do
   end
 
   after(:all) do
-    @site.browser.close
+    @site.close_browser
   end
 
   it "disables automatic navigation the old way" do
@@ -154,16 +154,21 @@ describe "Page Object" do
     expect { p.visit }.to raise_error SiteObject::BrowserLibraryNotSupportedError
   end
 
-  it "doesn't raise when expect_page is called and the specified page is selected" do
-    @site.landing_page
-    expect(@site.expect_page(:landing_page)).to be_truthy
+  it "doesn't raise when expect_page is called and current page matches" do
+   p = @site.landing_page
+   expect(@site.expect_page(LandingPage)).to be_truthy
+   expect(@site.expect_page(p)).to be_truthy
+   expect(@site.expect_page(:landing_page)).to be_truthy
   end
 
-  it "raises when expect_page is called and the specified page is not selected" do
-    p = @site.landing_page
-    expect(@site.expect_page(LandingPage)).to be_truthy
-    expect(@site.expect_page(p)).to be_truthy
-    expect(@site.expect_page(:landing_page)).to be_truthy
+  it "raises when expect_page is called and current page is known but does not match" do
+    @site.news_page
+    expect { @site.expect_page(LandingPage) }.to raise_error SiteObject::WrongPageError
+  end
+
+  it "raises when expect_page is called and current page unknown" do
+    @site.browser.goto('https://google.com')
+    expect { @site.expect_page(LandingPage) }.to raise_error SiteObject::WrongPageError
   end
 
   it "won't initialize a site object if the argument isn't a Hash" do
@@ -184,11 +189,126 @@ describe "Page Object" do
     expect { @site.inspect }.to_not raise_error
   end
 
-  it "delegates unknown method calls down to most recent page" do
-    p = @site.delegation_page.visit
-    expect(p.args_and_block(1, 2) {'foo'}).to eq :args_and_block
-    expect(p.block_only {'foo'}).to eq :block_only
-    expect(p.args_only(1, 2)).to eq :args_only
-    expect(p.method_only).to eq :method_only
+  it "calls a page element" do
+    @site.news_page.posts.first.post_title.click
+    expect(@site.news_post_page?).to be_truthy
+    expect(@site.post.text).to be_kind_of(String)
   end
+
+  it "handles an empty page_url" do
+    @site.testing_page_empty_url
+    expect(@site.testing_page_empty_url?).to be_truthy
+  end
+
+  it "handles a fully qualified page_url" do
+    @site.testing_page_full_url
+    expect(@site.testing_page_full_url?).to be_truthy
+  end
+
+  it "can be initialized with a non hash argument" do
+    lang = Lang.new('en')
+    @site.landing_page lang
+  end
+
+  it "raises when the page URL has no arguments but page arguments are provided" do
+    expect { @site.no_attr_page foo: 'bar' }.to raise_error SiteObject::PageInitError
+  end
+
+end
+
+describe "Site Object Delegation" do
+
+  before(:all) do
+    @site = RubyLangSite.new(Watir::Browser.new, "en")
+  end
+
+  after(:all) do
+    @site.close_browser
+  end
+
+  context "Delegation to Most Recent Page" do
+    before(:each) { @site.landing_page.visit }
+
+    it "delegates unknown method with args and block down to most recent page" do
+      expect(@site.args_and_block(1, 2) {'foo'}).to eq :args_and_block
+    end
+
+    it "delegates unknown method with block down to most recent page" do
+      expect(@site.block_only {'foo'}).to eq :block_only
+    end
+
+    it "delegates unknown method with args down to most recent page" do
+      expect(@site.args_only(1, 2)).to eq :args_only
+    end
+
+    it "delegates unknown method with no args or block down to most recent page" do
+      expect(@site.method_only).to eq :method_only
+    end
+
+    it "hits method_missing when the page doesn't recognize delegated method" do
+      expect { @site.invalid_method_call }.to raise_error NoMethodError
+    end
+  end
+
+  context "Delegation after Finding Page" do
+    before(:each) do
+      @site.news_page.visit
+      @site.browser.goto @site.base_url + '/en/'
+    end
+
+    it "delegates unknown method with args and block after it identifies new page" do
+      expect(@site.args_and_block(1, 2) {'foo'}).to eq :args_and_block
+    end
+
+    it "delegates unknown method with block after it identifies new page" do
+      expect(@site.block_only {'foo'}).to eq :block_only
+    end
+
+    it "delegates unknown method with args after it identifies new page" do
+      expect(@site.args_only(1, 2)).to eq :args_only
+    end
+
+    it "delegates unknown method after it identifies new page" do
+      expect(@site.method_only).to eq :method_only
+    end
+
+    it "hits method_missing when the page doesn't recognize delegated method" do
+      expect { @site.invalid_method_call }.to raise_error NoMethodError
+    end
+  end
+
+end
+
+describe "Site Object Browser Management" do
+
+  context "Watir" do
+    before(:all) do
+      @site = GoogleSite.new(base_url: 'https://google.com')
+    end
+
+    it "opens a browser" do
+      @site.open_browser(:watir, :firefox)
+      expect(@site.browser).to be_instance_of Watir::Browser
+    end
+
+    it "closes a browser" do
+      @site.browser.close
+      expect(@site.browser.exists?).to be_falsey
+    end
+  end
+
+  context "Selenium" do
+   before(:all) do
+     @site = GoogleSite.new(base_url: 'https://google.com')
+   end
+
+   it "opens a browser" do
+     @site.open_browser(:selenium, :firefox)
+     expect(@site.browser).to be_instance_of Selenium::WebDriver::Driver
+   end
+
+   it "closes a browser" do
+     expect { @site.browser.close }.to_not raise_error
+   end
+ end
 end

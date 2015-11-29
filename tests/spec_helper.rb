@@ -76,6 +76,23 @@ class LandingPage < RubyLangTemplate
   def posts
     @browser.divs(:class, 'post').map { |div| PostSummary.new(div) }
   end
+
+  def args_and_block(*args, &block)
+    __method__
+  end
+
+  def args_only(*args)
+    __method__
+  end
+
+  def block_only(&block)
+    __method__
+  end
+
+  def method_only
+    __method__
+  end
+
 end
 
 # Models the news page, which shows summaries of the last ten most recent posts. The user
@@ -84,6 +101,7 @@ class NewsPage < RubyLangTemplate
   # Sets a templated URL that will be used for navigation (and for URL matching if a URL
   # matcher isn't provided.) See HeaderBar and FooterBar page features defined above.
   set_url "/{language}/news/"
+  set_url_matcher /\S+\/news\/$/
 
   # Returns all post summary divs with a little extra functionality wrapped around them.
   def posts
@@ -94,7 +112,7 @@ end
 # This page hosts a single, complete, news post. Users get to it by drilling down on
 # summaries on the landing page or the news page.
 class NewsPostPage < RubyLangTemplate
-  set_url_matcher %r{/en/news/\d+/\d+/\d+/\S+/} #
+  set_url_matcher %r{/\S{2}/news/\d+/\d+/\d+/\S+/} #
   set_attributes  :navigation_disabled
   # use_features    :header_bar, :footer_bar
 
@@ -114,6 +132,10 @@ end
 
 class FooAttrPage < RubyLangTemplate
   set_url "/{language}/{foo}"
+end
+
+class NoAttrPage < RubyLangTemplate
+  set_url "/en/"
 end
 
 class TestingPageNavDisabledOld < RubyLangTemplate
@@ -138,6 +160,16 @@ class TestingPageBadMatcher < RubyLangTemplate
   set_url_matcher /invalid/
 end
 
+class TestingPageEmptyURL < RubyLangTemplate
+  set_url ''
+  set_url_matcher /.*/
+end
+
+class TestingPageFullURL < RubyLangTemplate
+  set_url "/{language}/"
+  set_url_matcher /.*/
+end
+
 class BadSite
   include SiteObject
 end
@@ -150,23 +182,18 @@ class EmptySite
   include SiteObject
 end
 
-class DelegationPage < LandingPage
-  set_url "/{language}/"
+class GoogleSite
+  include SiteObject
+end
 
-  def args_and_block(*args, &block)
-    __method__
-  end
+class SearchPage < GoogleSite::Page
+end
 
-  def args_only(*args)
-    __method__
-  end
+class Lang
+  attr_accessor :language
 
-  def block_only(&block)
-    __method__
-  end
-
-  def method_only
-    __method__
+  def initialize(language)
+    @language = language
   end
 end
 

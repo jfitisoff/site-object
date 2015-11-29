@@ -199,9 +199,9 @@ module SiteObject
     found_page = nil
 
     @pages.each do |p|
-      if p.url_template.match url
+      if p.url_matcher && p.url_matcher =~ url
         found_page = p
-      elsif p.url_matcher && p.url_matcher =~ url
+      elsif p.url_template.match url
         found_page = p
       end
 

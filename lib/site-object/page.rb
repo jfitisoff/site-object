@@ -265,8 +265,6 @@ module PageObject
 
     def set_url_template(base_url)
       case @page_url
-      when '' # There's no page URL so just assume the base URL
-        @url_template = Addressable::Template.new(base_url)
       when /(http:\/\/|https:\/\/)/i
         @url_template = Addressable::Template.new(@page_url)
       else
