@@ -1,4 +1,4 @@
-module SiteObjectExceptions
+module SiteObject
   class BrowserLibraryNotSupportedError < RuntimeError
   end
 
