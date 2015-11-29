@@ -81,7 +81,7 @@ module PageObject
     # If the visit method is called on the page a SiteObject::PageNavigationNotAllowedError
     # will be raised.
     def disable_automatic_navigation
-      puts "DEPRECATED. Will be removed in a future release. Use the set_attributes method in place of this one. See documentation for more details."
+      puts "The disable_automatic_navigation is deprecated and will be removed in a future release. Use the set_attributes method in place of this one in the class definition. See documentation for more details."
       @page_attributes ||= []
       @page_attributes << :navigation_disabled
       @navigation_disabled = true
@@ -320,7 +320,7 @@ module PageObject
     # There's no need to ever call this directly. Initializes a page object within the context of a
     # site object. Takes a site object and a hash of configuration arguments. The site object will
     # handle all of this for you.
-    def initialize(site, args)
+    def initialize(site, args=nil)
       @browser = site.browser
       @page_attributes = self.class.page_attributes
       @page_url = self.class.page_url
@@ -333,8 +333,14 @@ module PageObject
 
       # Try to expand the URL template if the URL has parameters.
       @arguments = {}.with_indifferent_access # Stores the param list that will expand the url_template after examining the arguments used to initialize the page.
-      if @required_arguments.present? 0 && !args
-        raise SiteObject::PageInitError, "No arguments provided when attempting to initialize #{self.class.name} (). This page object requires the following arguments for initialization: :#{@required_arguments.join(', :')}.\n\n#{caller.join("\n")}"
+      if @required_arguments.present? && !args
+        @required_arguments.each do |arg|
+          if @site.respond_to?(arg)
+            @arguments[arg]= site.send(arg)
+          else
+            raise SiteObject::PageInitError, "No arguments provided when attempting to initialize #{self.class.name}. This page object requires the following arguments for initialization: :#{@required_arguments.join(', :')}.\n\n#{caller.join("\n")}"
+          end
+        end
       elsif @required_arguments.present?
         @required_arguments.each do |arg| # Try to extract each URL argument from the hash or object provided, OR from the site object.
           if args.is_a?(Hash) && args.present?
@@ -356,7 +362,7 @@ module PageObject
               raise SiteObject::PageInitError, "#{args.class} was provided, but this object did not respond to :#{arg}, which is necessary to build an URL for the #{self.class.name} page.\n\n#{caller.join("\n")}"
             end
           else
-            # Do nothing here.
+           # No need to do anything here.
           end
         end
       elsif @required_arguments.empty? && args # If there are no required arguments then nothing should be provided.
@@ -364,6 +370,7 @@ module PageObject
       else
         # Do nothing here.
       end
+
       @url = @url_template.expand(@arguments).to_s
       @page_features ||= []
       @page_features.each do |arg|
@@ -384,11 +391,7 @@ module PageObject
       @site.most_recent_page = self
       unless on_page?
         if navigation_disabled?
-          if page = @site.page
-            raise SiteObject::PageNavigationNotAllowedError, "The #{self.class.name} page could not be accessed. Navigation is intentionally disabled for this page and the browser was displaying the #{@site.page.class.name} page when you tried to access it.\n\nPAGE URL:\n------------\n#{@site.browser.url}\n\n#{caller.join("\n")}"
-          else
-            raise SiteObject::PageNavigationNotAllowedError, "The #{self.class.name} page could not be accessed. Navigation is intentionally disabled for this page and the page that the browser was displaying could not be recognized.\n\nPAGE URL:\n------------\n#{@site.browser.url}\n\nPAGE TEXT:\n------------\n#{@site.browser.text}\n\n#{caller.join("\n")}"
-          end
+          raise SiteObject::PageNavigationNotAllowedError, "Navigation is intentionally disabled for the #{self.class.name} page. You can only call the accessor method for this page when it's already being displayed in the browser.\n\nCurrent URL:\n------------\n#{@site.browser.url}\n\n#{caller.join("\n")}"
         end
         visit
       end

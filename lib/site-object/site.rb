@@ -7,8 +7,6 @@ module SiteObject
   attr_reader :base_url, :unique_methods
   attr_accessor :pages, :browser, :arguments, :most_recent_page
 
-  include SiteObjectExceptions
-
   # Sets up a Page class when the SiteObject module is included in the class you're using to model
   # your site.
   def self.included(base)
@@ -91,7 +89,7 @@ module SiteObject
         end
 
         self.class.class_eval do
-          define_method(current_page.to_s.underscore) do |args={}, block=nil|
+          define_method(current_page.to_s.underscore) do |args=nil, block=nil|
             current_page.new(self, args)
           end
 

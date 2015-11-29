@@ -99,8 +99,62 @@ class TestingPage < RubyLangTemplate
   element(:foo) { |b| b.text_field(:id, 'bogus') }
 end
 
-class TestingPageNavDisabled < RubyLangTemplate
+class FooAttrPage < RubyLangTemplate
+  set_url "/{language}/{foo}"
+end
+
+class TestingPageNavDisabledOld < RubyLangTemplate
+  disable_automatic_navigation
   set_url "/{language}/"
+end
+
+class TestingPageNavDisabledNew < RubyLangTemplate
+  set_attributes :navigation_disabled
+  set_url "/{language}/"
+end
+
+class TestingPageNoArgs < RubyLangTemplate
+  set_url "/en/"
+end
+
+class TestingPageHasFrag < RubyLangTemplate
+  set_url "/en/#/frag"
+end
+
+class TestingPageBadMatcher < RubyLangTemplate
+  set_url_matcher /invalid/
+end
+
+class BadSite
+  include SiteObject
+end
+
+class BadPage < BadSite::Page
+  set_url_matcher 'invalid'
+end
+
+class EmptySite
+  include SiteObject
+end
+
+class DelegationPage < LandingPage
+  set_url "/{language}/"
+
+  def args_and_block(*args, &block)
+    __method__
+  end
+
+  def args_only(*args)
+    __method__
+  end
+
+  def block_only(&block)
+    __method__
+  end
+
+  def method_only
+    __method__
+  end
 end
 
 # An element container class. This class adds a little bit of functionality to the
