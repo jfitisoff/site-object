@@ -4,8 +4,8 @@
 require_relative 'spec_helper'
 
 describe 'environment' do
-  it "returns a version" do
-    expect(SiteObject::VERSION).to be_truthy, "Version is #{SiteObject::VERSION}"
+  it "returns a version (#{SiteObject::VERSION})" do
+    expect(SiteObject::VERSION).to be_truthy
   end
 end
 
