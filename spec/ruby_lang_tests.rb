@@ -2,7 +2,7 @@
 # Some RSpec tests for the news post functionality of the https://ruby-lang.org site.
 
 require_relative 'spec_helper'
-require 'pry'
+
 describe 'environment' do
   it "returns a version" do
     expect(SiteObject::VERSION).to be_truthy, "Version is #{SiteObject::VERSION}"
