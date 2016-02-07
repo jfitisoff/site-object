@@ -1,4 +1,3 @@
-require 'pry'
 # Page objects are containers for all of the functionality of a page that you want to expose for testing
 # purposes. When you create a page object you define a URL to access it, elements for all of the page
 # elements that you want to work with as well as higher level methods that use those elements to perform
