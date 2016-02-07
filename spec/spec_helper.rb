@@ -196,6 +196,17 @@ class TestingPageEmptyURL < GithubSite::Page
   set_url ''
 end
 
+class StripeSite
+  include SiteObject
+end
+
+class StripeConnectPage < StripeSite::Page
+  set_url "https://connect.stripe.com/oauth/authorize{?params*}"
+  set_attributes :navigation_disabled
+
+  el(:sign_in) { |b| b.link(:text, /Sign in/i)}
+end
+
 class Lang
   attr_accessor :language
 

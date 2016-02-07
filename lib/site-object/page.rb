@@ -1,3 +1,4 @@
+require 'pry'
 # Page objects are containers for all of the functionality of a page that you want to expose for testing
 # purposes. When you create a page object you define a URL to access it, elements for all of the page
 # elements that you want to work with as well as higher level methods that use those elements to perform
@@ -169,6 +170,10 @@ module PageObject
       @arguments ||= @url_template.keys.map { |k| k.to_sym }
     end
 
+    def query_argument
+      required_arguments.find { |x| @url_template.pattern =~ /{\?#{x}\*}/}
+    end
+
     # Used to define the full or relative URL to the page. Typically, you will *almost* *always* want to use
     # this method when defining a page object (but see notes below.) The URL can be defined in a number
     # of different ways. Here are some examples using Google News:
@@ -305,7 +310,7 @@ module PageObject
   end
 
   module PageInstanceMethods
-    attr_reader :arguments, :browser, :page_attributes, :page_elements, :page_features, :page_url, :required_arguments, :site, :url_template, :url_matcher
+    attr_reader :arguments, :browser, :page_attributes, :page_elements, :page_features, :page_url, :query_argument, :required_arguments, :site, :url_template, :url_matcher
 
     # Takes the name of a page class. If the current page is of that class then it returns a page
     # object for the page. Raises a SiteObject::WrongPageError if that's not the case.
@@ -328,6 +333,7 @@ module PageObject
       @site = site
       @url_matcher = self.class.url_matcher
       @url_template = self.class.url_template
+      @query_argument = self.class.query_argument
 
       # Try to expand the URL template if the URL has parameters.
       @arguments = {}.with_indifferent_access # Stores the param list that will expand the url_template after examining the arguments used to initialize the page.
@@ -349,7 +355,7 @@ module PageObject
             elsif @site.respond_to?(arg)
               @arguments[arg]= site.send(arg)
             else
-              raise SiteObject::PageInitError, "#{args.class} was provided, but this object did not respond to :#{arg}, which is necessary to build an URL for the #{self.class.name} page.\n\n#{caller.join("\n")}"
+              raise SiteObject::PageInitError, "A required page argument is missing. #{args.class} was provided, but this object did not respond to :#{arg}, which is necessary to build an URL for the #{self.class.name} page.\n\n#{caller.join("\n")}"
             end
           elsif args # Some non-hash object was provided.
             if args.respond_to?(arg) #The hash has the required argument.
@@ -357,16 +363,16 @@ module PageObject
             elsif @site.respond_to?(arg)
               @arguments[arg]= site.send(arg)
             else
-              raise SiteObject::PageInitError, "#{args.class} was provided, but this object did not respond to :#{arg}, which is necessary to build an URL for the #{self.class.name} page.\n\n#{caller.join("\n")}"
+              raise SiteObject::PageInitError, "A required page argument is missing. #{args.class} was provided, but this object did not respond to :#{arg}, which is necessary to build an URL for the #{self.class.name} page.\n\n#{caller.join("\n")}"
             end
           else
-           # No need to do anything here.
+            # Do nothing here yet.
           end
         end
       elsif @required_arguments.empty? && args # If there are no required arguments then nothing should be provided.
         raise SiteObject::PageInitError, "#{args.class} was provided as a #{self.class.name} initialization argument, but the page URL doesn't require any arguments.\n\n#{caller.join("\n")}"
       else
-        # Do nothing here.
+        # Do nothing here yet.
       end
 
       @url = @url_template.expand(@arguments).to_s
@@ -449,11 +455,10 @@ module PageObject
         else
           if page_args = @url_template.extract(Addressable::URI.parse(url))
             page_args = page_args.with_indifferent_access
-            return true if @arguments.all? { |k, v| page_args[k] == v.to_s }
+            (@required_arguments - [query_argument]).all? { |k| page_args[k] == @arguments[k].to_s }
           end
         end
       end
-      false
     end
 
     def navigation_disabled?

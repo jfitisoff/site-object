@@ -25,5 +25,5 @@ Gem::Specification.new do |s|
   ]
   s.required_ruby_version = '>= 1.9.3'
   s.add_runtime_dependency "activesupport", '>= 4.0.0'
-  s.add_runtime_dependency "addressable", '~> 2.3', '>= 2.3.8'
+  s.add_runtime_dependency "addressable", '~> 2.4', '>= 2.4.0'
 end
