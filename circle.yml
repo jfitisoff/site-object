@@ -3,4 +3,5 @@ machine:
     version: 2.2.3
 test:
   post:
+    - rake install
     - bundle exec rspec spec/ruby_lang_tests.rb -f html -o $CIRCLE_ARTIFACTS/test_report.html
