@@ -1,6 +1,13 @@
 # landing_page_tests.rb
 # Some RSpec tests for the news post functionality of the https://ruby-lang.org site.
+
 require_relative 'spec_helper'
+
+describe 'environment' do
+  it "returns a version (#{SiteObject::VERSION})" do
+    expect(SiteObject::VERSION).to be_truthy
+  end
+end
 
 describe "https://ruby-lang.org" do
 
