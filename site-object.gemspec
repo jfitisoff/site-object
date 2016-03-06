@@ -24,6 +24,6 @@ Gem::Specification.new do |s|
     "lib/site-object/version.rb"
   ]
   s.required_ruby_version = '>= 1.9.3'
-  s.add_runtime_dependency "activesupport", '>= 4.0.0'
-  s.add_runtime_dependency "addressable", '~> 2.4', '>= 2.4.0'
+  s.add_runtime_dependency "activesupport"
+  s.add_runtime_dependency "addressable"
 end

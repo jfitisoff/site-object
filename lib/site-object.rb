@@ -1,4 +1,7 @@
-require 'active_support/all'
+# require 'active_support/all'
+
+require 'active_support'
+require 'active_support/core_ext'
 require 'addressable/template'
 
 require "site-object/element_container"
