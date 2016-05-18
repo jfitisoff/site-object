@@ -449,9 +449,9 @@ module PageObject
         end
       else # There's no fragment in the URL template, strip the fragment out of the URL so that template matching works better.
         if @browser.is_a? Watir::Browser
-          url = @browser.url.split('#')[0]
+          url = @browser.url.split(/(\?|#)/)[0]
         elsif @browser.is_a? Selenium::WebDriver::Driver
-          url = @browser.current_url.split('#')[0]
+          url = @browser.current_url.split(/(\?|#)/)[0]
         else
           raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
         end
