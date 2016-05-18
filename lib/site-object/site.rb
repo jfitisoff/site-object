@@ -213,7 +213,7 @@ module SiteObject
     @pages.each do |p|
       if p.url_matcher && p.url_matcher =~ url
         found_page = p
-      elsif p.url_template.match url
+      elsif p.url_template.match url.split(/(\?|#)/)[0]
         found_page = p
       end
 

@@ -62,7 +62,18 @@
 module PageObject
 
   module PageClassMethods
-    cattr_accessor :page_features # Page features should be inheritable so that page templates work.
+
+    # Page features should be inheritable so that page templates work. So using cattr_accessor
+    # to allow that. Older versions of active_support were acting a little strange though --
+    # the cattr_accessor method wasn't getting recognized even though the requires were right.
+    # So the rescue block below is there to cover that case where cattr_accessor isn't
+    # getting recognized for some reason.
+    begin
+      cattr_accessor :page_features
+    rescue NoMethodError => e
+      Module.cattr_accessor :page_features
+    end
+
     attr_reader    :page_attributes, :page_elements, :page_url, :url_template, :url_matcher
 
     # DEPRECATED. Use the set_attributes method instead.
@@ -438,9 +449,9 @@ module PageObject
         end
       else # There's no fragment in the URL template, strip the fragment out of the URL so that template matching works better.
         if @browser.is_a? Watir::Browser
-          url = @browser.url.split('#')[0]
+          url = @browser.url.split(/(\?|#)/)[0]
         elsif @browser.is_a? Selenium::WebDriver::Driver
-          url = @browser.current_url.split('#')[0]
+          url = @browser.current_url.split(/(\?|#)/)[0]
         else
           raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
         end
