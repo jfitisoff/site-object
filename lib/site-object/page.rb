@@ -180,8 +180,8 @@ module PageObject
       @arguments ||= @url_template.keys.map { |k| k.to_sym }
     end
 
-    def query_argument
-      required_arguments.find { |x| @url_template.pattern =~ /{\?#{x}\*}/}
+    def query_arguments
+      required_arguments.find { |x| @url_template.pattern =~ /\?.*#{x}=*/ }
     end
 
     # Used to define the full or relative URL to the page. Typically, you will *almost* *always* want to use
@@ -320,7 +320,7 @@ module PageObject
   end
 
   module PageInstanceMethods
-    attr_reader :arguments, :browser, :page_attributes, :page_elements, :page_features, :page_url, :query_argument, :required_arguments, :site, :url_template, :url_matcher
+    attr_reader :arguments, :browser, :page_attributes, :page_elements, :page_features, :page_url, :query_arguments, :required_arguments, :site, :url_template, :url_matcher
 
     # Takes the name of a page class. If the current page is of that class then it returns a page
     # object for the page. Raises a SiteObject::WrongPageError if that's not the case.
@@ -343,7 +343,7 @@ module PageObject
       @site = site
       @url_matcher = self.class.url_matcher
       @url_template = self.class.url_template
-      @query_argument = self.class.query_argument
+      @query_arguments = self.class.query_arguments
 
       # Try to expand the URL template if the URL has parameters.
       @arguments = {}.with_indifferent_access # Stores the param list that will expand the url_template after examining the arguments used to initialize the page.
@@ -416,45 +416,21 @@ module PageObject
       "#<#{self.class.name}:#{object_id} @url_template=#{@url_template.inspect}>"
     end
 
-    # Returns true if the page defined by the page object is currently being displayed in the browser,
-    # false if not. It does this in two different ways, which are described below.
-    #
-    # A page always has a URL defined for it. This is typically done by using the Page.set_url method
-    # to specify a URL when defining the page. You can skip using the set_url method but in that case
-    # the page URL defaults to the base URL defined for the site object.
-    #
-    # The default approach for determining if the page is being displayed relies on the URL defined for
-    # the page. This method first does a general match against the current browser URL page's URL template.
-    # If a match occurs here, and there are no required arguments for the page the method returns true.
-    # If the page's URL template does require arguments the method performs an additional check to
-    # verify that each of the arguments defined for the page match what's in the current browser URL.
-    # If all of the arguments match then the method will return true.
-    #
-    # This should work for most cases but may not always be enough. For example, there may be a redirect
-    # and the URL used to navigate to the page may not be the final page URL. There's a fallback
-    # mechanism for these sorts of situations. You can use the Page.set_url_matcher method to define a
-    # regular expression that the method will use in place of the URL template. If the regular expression
-    # matches, then the method will return true even if the URL wouldn't match the URL template.
-    #
-    # It's better to use the default URL matching if possible. But if for some reason it's not feasible
-    # you can use the alternate method to specify how to match the page.
     def on_page?
-      if @url_template.pattern =~ /#/ # It has a URL fragment. Don't mess with the browser URL.
-        if @browser.is_a? Watir::Browser
-          url = @browser.url
-        elsif @browser.is_a? Selenium::WebDriver::Driver
-          url = @browser.current_url
-        else
-          raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+      if @browser.is_a? Watir::Browser
+        url = @browser.url
+      elsif @browser.is_a? Selenium::WebDriver::Driver
+        url = @browser.current_url
+      else
+        raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+      end
+
+      if query_arguments # There are query arguments so leave queries alone.
+        unless @url_template.pattern =~ /#/ # Only do this when URL template has no fragment.
+          url = url.split(/#/)[0]
         end
-      else # There's no fragment in the URL template, strip the fragment out of the URL so that template matching works better.
-        if @browser.is_a? Watir::Browser
-          url = @browser.url.split(/(\?|#)/)[0]
-        elsif @browser.is_a? Selenium::WebDriver::Driver
-          url = @browser.current_url.split(/(\?|#)/)[0]
-        else
-          raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
-        end
+      else # There are no query arguments so remove query/fragment parts of URL when template matching.
+        url = url.split(/(\?|#)/)[0]
       end
 
       if @url_matcher && @url_matcher =~ url
@@ -463,9 +439,9 @@ module PageObject
         if @arguments.empty?
           return true
         else
-          if page_args = @url_template.extract(Addressable::URI.parse(url))
-            page_args = page_args.with_indifferent_access
-            (@required_arguments - [query_argument]).all? { |k| page_args[k] == @arguments[k].to_s }
+          if pargs = @url_template.extract(Addressable::URI.parse(url))
+            pargs = pargs.with_indifferent_access
+            @required_arguments.all? { |k| pargs[k] == @arguments[k].to_s }
           end
         end
       end
