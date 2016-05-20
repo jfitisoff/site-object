@@ -162,10 +162,20 @@ module SiteObject
   #  site.on_page? AccountSummaryPage
   #  =>true
   def on_page?(page_arg)
-    if page_arg.respond_to? :on_page?
-      page_arg.on_page?
+    if @browser.is_a? Watir::Browser
+      url = @browser.url
+    elsif @browser.is_a? Selenium::WebDriver::Driver
+      url = @browser.current_url
     else
-      page_arg.class == page.class
+      raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+    end
+
+    if page_arg.url_matcher && page_arg.url_matcher =~ url
+      return true
+    elsif page_arg.url_template.match url
+      return true
+    else
+      return false
     end
   end
 

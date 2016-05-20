@@ -417,12 +417,14 @@ module PageObject
     end
 
     def on_page?
-      if @browser.is_a? Watir::Browser
-        url = @browser.url
-      elsif @browser.is_a? Selenium::WebDriver::Driver
-        url = @browser.current_url
-      else
-        raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+      unless url
+        if @browser.is_a? Watir::Browser
+          url = @browser.url
+        elsif @browser.is_a? Selenium::WebDriver::Driver
+          url = @browser.current_url
+        else
+          raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+        end
       end
 
       if query_arguments # There are query arguments so leave queries alone.
