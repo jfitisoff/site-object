@@ -74,7 +74,7 @@ module PageObject
       Module.cattr_accessor :page_features
     end
 
-    attr_reader    :page_attributes, :page_elements, :page_url, :url_template, :url_matcher
+    attr_reader    :page_attributes, :page_elements, :page_url, :url_template, :url_matcher, :has_fragment
 
     # DEPRECATED. Use the set_attributes method instead.
     # This method can be used to disable page navigation when defining a page class (it sets an
@@ -285,6 +285,7 @@ module PageObject
       else
         @url_template = Addressable::Template.new(Addressable::URI.parse("#{base_url}#{@page_url}"))
       end
+      @has_fragment = @url_template.pattern =~ /#/
     end
 
     # Optional. Allows you to specify a fallback mechanism for checking to see if the correct page is
@@ -320,7 +321,7 @@ module PageObject
   end
 
   module PageInstanceMethods
-    attr_reader :arguments, :browser, :page_attributes, :page_elements, :page_features, :page_url, :query_arguments, :required_arguments, :site, :url_template, :url_matcher
+    attr_reader :arguments, :browser, :has_fragment, :page_attributes, :page_elements, :page_features, :page_url, :query_arguments, :required_arguments, :site, :url_template, :url_matcher
 
     # Takes the name of a page class. If the current page is of that class then it returns a page
     # object for the page. Raises a SiteObject::WrongPageError if that's not the case.
@@ -344,6 +345,8 @@ module PageObject
       @url_matcher = self.class.url_matcher
       @url_template = self.class.url_template
       @query_arguments = self.class.query_arguments
+      @has_fragment    = self.class.has_fragment
+
 
       # Try to expand the URL template if the URL has parameters.
       @arguments = {}.with_indifferent_access # Stores the param list that will expand the url_template after examining the arguments used to initialize the page.
@@ -425,12 +428,12 @@ module PageObject
         raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
       end
 
-      if query_arguments # There are query arguments so leave queries alone.
-        unless @url_template.pattern =~ /#/ # Only do this when URL template has no fragment.
+      if query_arguments
+        if @has_fragment
           url = url.split(/#/)[0]
         end
-      else # There are no query arguments so remove query/fragment parts of URL when template matching.
-        url = url.split(/(\?|#)/)[0]
+      else
+        url = url.split(/\?/)[0]
       end
 
       if @url_matcher && @url_matcher =~ url
@@ -445,6 +448,7 @@ module PageObject
           end
         end
       end
+
     end
 
     def navigation_disabled?
