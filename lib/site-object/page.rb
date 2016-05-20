@@ -416,36 +416,36 @@ module PageObject
       "#<#{self.class.name}:#{object_id} @url_template=#{@url_template.inspect}>"
     end
 
-    # def on_page?
-    #   if @browser.is_a? Watir::Browser
-    #     url = @browser.url
-    #   elsif @browser.is_a? Selenium::WebDriver::Driver
-    #     url = @browser.current_url
-    #   else
-    #     raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
-    #   end
-    #
-    #   if query_arguments # There are query arguments so leave queries alone.
-    #     unless @url_template.pattern =~ /#/ # Only do this when URL template has no fragment.
-    #       url = url.split(/#/)[0]
-    #     end
-    #   else # There are no query arguments so remove query/fragment parts of URL when template matching.
-    #     url = url.split(/(\?|#)/)[0]
-    #   end
-    #
-    #   if @url_matcher && @url_matcher =~ url
-    #     return true
-    #   elsif @url_template.match(url)
-    #     if @arguments.empty?
-    #       return true
-    #     else
-    #       if pargs = @url_template.extract(Addressable::URI.parse(url))
-    #         pargs = pargs.with_indifferent_access
-    #         @required_arguments.all? { |k| pargs[k] == @arguments[k].to_s }
-    #       end
-    #     end
-    #   end
-    # end
+    def on_page?
+      if @browser.is_a? Watir::Browser
+        url = @browser.url
+      elsif @browser.is_a? Selenium::WebDriver::Driver
+        url = @browser.current_url
+      else
+        raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
+      end
+
+      if query_arguments # There are query arguments so leave queries alone.
+        unless @url_template.pattern =~ /#/ # Only do this when URL template has no fragment.
+          url = url.split(/#/)[0]
+        end
+      else # There are no query arguments so remove query/fragment parts of URL when template matching.
+        url = url.split(/(\?|#)/)[0]
+      end
+
+      if @url_matcher && @url_matcher =~ url
+        return true
+      elsif @url_template.match(url)
+        if @arguments.empty?
+          return true
+        else
+          if pargs = @url_template.extract(Addressable::URI.parse(url))
+            pargs = pargs.with_indifferent_access
+            @required_arguments.all? { |k| pargs[k] == @arguments[k].to_s }
+          end
+        end
+      end
+    end
 
     def navigation_disabled?
       @page_attributes.include? :navigation_disabled
