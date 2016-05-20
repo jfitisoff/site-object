@@ -428,14 +428,6 @@ module PageObject
         raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
       end
 
-      # if query_arguments # There are query arguments so leave queries alone.
-      #   unless @url_template.pattern =~ /#/ # Only do this when URL template has no fragment.
-      #     alt_url = url.split(/#/)[0]
-      #   end
-      # else # There are no query arguments so remove query/fragment parts of URL when template matching.
-      #   alt_url = url.split(/(\?|#)/)[0]
-      # end
-
       if query_arguments
         if @has_fragment
           url = url.split(/#/)[0]
