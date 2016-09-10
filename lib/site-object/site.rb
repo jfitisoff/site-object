@@ -221,7 +221,11 @@ module SiteObject
     end
 
     if found_page && !found_page.required_arguments.empty?
-      return found_page.new(self, found_page.url_template.extract(url))
+      if hsh = found_page.url_template.extract(url)
+        return found_page.new(self, found_page.url_template.extract(url))
+      else
+        return found_page.new(self, found_page.url_template.extract(url.split(/(\?|#)/)[0]))
+      end
     elsif found_page
       return found_page.new(self)
     else
