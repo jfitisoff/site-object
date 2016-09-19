@@ -436,8 +436,12 @@ module PageObject
         url = url.split(/\?/)[0]
       end
 
-      if @url_matcher && @url_matcher =~ url
-        return true
+      if @url_matcher
+        if @url_matcher =~ url
+          return true
+        else
+          return false
+        end
       elsif @url_template.match(url)
         if @arguments.empty?
           return true
