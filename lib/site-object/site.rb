@@ -170,25 +170,22 @@ module SiteObject
       raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
     end
 
-    tmp = page
-    if tmp == page_arg || tmp.class == page_arg
-      return true
-    else
-      return false
+    if page_arg.url_matcher && page_arg.url_matcher =~ url
+      true
+    elsif page_arg.query_arguments && page_arg.url_template.match(url)
+      true
+    elsif !page_arg.query_arguments && page_arg.url_template.match(url.split(/(\?|#|\/$)/)[0])
+      true
     end
+    false
 
-    m = self.class.url_matcher
-    q = self.class.query_arguments
-    u = self.class.url_template
-    if m && m =~ url
-      return true
-    elsif q && u.match(url)
-      return true
-    elsif !q && u.match(url.split(/(\?|#|\/$)/)[0])
-      return true
-    else
-      return false
-    end
+    # if page_arg.url_matcher && page_arg.url_matcher =~ url
+    #   return true
+    # elsif page_arg.url_template.match url
+    #   return true
+    # else
+    #   return false
+    # end
   end
 
   # Can be used to open a browser for the site object if the user did not pass one in when it was

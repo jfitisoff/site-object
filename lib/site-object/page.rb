@@ -433,7 +433,7 @@ module PageObject
           url = url.split(/#/)[0]
         end
       else
-        url = url.split(/(\?|#|\/$)/)[0]
+        url = url.split(/(\?|#)/)[0]
       end
 
       if @url_matcher
@@ -447,6 +447,15 @@ module PageObject
           return true
         else
           if pargs = @url_template.extract(Addressable::URI.parse(url))
+            pargs = pargs.with_indifferent_access
+            @required_arguments.all? { |k| pargs[k] == @arguments[k].to_s }
+          end
+        end
+      elsif @url_template.match(url.split(/\/$/)[0])
+        if @arguments.empty?
+          return true
+        else
+          if pargs = @url_template.extract(Addressable::URI.parse(url.split(/\/$/)[0]))
             pargs = pargs.with_indifferent_access
             @required_arguments.all? { |k| pargs[k] == @arguments[k].to_s }
           end
