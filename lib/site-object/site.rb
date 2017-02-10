@@ -170,9 +170,21 @@ module SiteObject
       raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
     end
 
-    if page_arg.url_matcher && page_arg.url_matcher =~ url
+    tmp = page
+    if tmp == page_arg || tmp.class == page_arg
       return true
-    elsif page_arg.url_template.match url
+    else
+      return false
+    end
+
+    m = self.class.url_matcher
+    q = self.class.query_arguments
+    u = self.class.url_template
+    if m && m =~ url
+      return true
+    elsif q && u.match(url)
+      return true
+    elsif !q && u.match(url.split(/(\?|#|\/$)/)[0])
       return true
     else
       return false
@@ -210,13 +222,13 @@ module SiteObject
     end
 
     found_page = nil
-    @pages.each do |p|
-      if p.url_matcher && p.url_matcher =~ url
-        found_page = p
-      elsif p.query_arguments && p.url_template.match(url)
-        found_page = p
-      elsif !p.query_arguments && p.url_template.match(url.split(/(\?|#)/)[0])
-        found_page = p
+    @pages.each do |pg|
+      if pg.url_matcher && pg.url_matcher =~ url
+        found_page = pg
+      elsif pg.query_arguments && pg.url_template.match(url)
+        found_page = pg
+      elsif !pg.query_arguments && pg.url_template.match(url.split(/(\?|#|\/$)/)[0])
+        found_page = pg
       end
 
       break if found_page
@@ -226,7 +238,7 @@ module SiteObject
       if hsh = found_page.url_template.extract(url)
         return found_page.new(self, found_page.url_template.extract(url))
       else
-        return found_page.new(self, found_page.url_template.extract(url.split(/(\?|#)/)[0]))
+        return found_page.new(self, found_page.url_template.extract(url.split(/(\?|#|\/$)/)[0]))
       end
     elsif found_page
       return found_page.new(self)

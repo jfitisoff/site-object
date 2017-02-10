@@ -433,7 +433,7 @@ module PageObject
           url = url.split(/#/)[0]
         end
       else
-        url = url.split(/\?/)[0]
+        url = url.split(/(\?|#|\/$)/)[0]
       end
 
       if @url_matcher
