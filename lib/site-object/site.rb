@@ -172,20 +172,12 @@ module SiteObject
 
     if page_arg.url_matcher && page_arg.url_matcher =~ url
       true
-    elsif page_arg.query_arguments && page_arg.url_template.match(url)
+    elsif page_arg.url_template.match(url)
       true
-    elsif !page_arg.query_arguments && page_arg.url_template.match(url.split(/(\?|#|\/$)/)[0])
+    elsif page_arg.url_template.match(url.split(/(\?|#|\/$)/)[0])
       true
     end
     false
-
-    # if page_arg.url_matcher && page_arg.url_matcher =~ url
-    #   return true
-    # elsif page_arg.url_template.match url
-    #   return true
-    # else
-    #   return false
-    # end
   end
 
   # Can be used to open a browser for the site object if the user did not pass one in when it was
@@ -222,9 +214,9 @@ module SiteObject
     @pages.each do |pg|
       if pg.url_matcher && pg.url_matcher =~ url
         found_page = pg
-      elsif pg.query_arguments && pg.url_template.match(url)
+      elsif pg.url_template.match(url)
         found_page = pg
-      elsif !pg.query_arguments && pg.url_template.match(url.split(/(\?|#|\/$)/)[0])
+      elsif pg.url_template.match(url.split(/(\?|#|\/$)/)[0])
         found_page = pg
       end
 

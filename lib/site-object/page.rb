@@ -451,11 +451,11 @@ module PageObject
             @required_arguments.all? { |k| pargs[k] == @arguments[k].to_s }
           end
         end
-      elsif @url_template.match(url.split(/\/$/)[0])
+      elsif @url_template.match(url.split(/(\?|#|\/$)/)[0])
         if @arguments.empty?
           return true
         else
-          if pargs = @url_template.extract(Addressable::URI.parse(url.split(/\/$/)[0]))
+          if pargs = @url_template.extract(Addressable::URI.parse(url.split(/(\?|#|\/$)/)[0]))
             pargs = pargs.with_indifferent_access
             @required_arguments.all? { |k| pargs[k] == @arguments[k].to_s }
           end
@@ -498,6 +498,7 @@ module PageObject
       if @url_matcher
         raise SiteObject::WrongPageError, "Navigation check failed after attempting to access the #{self.class.name} page. Current URL #{@browser.url} did not match #{@url_template.pattern}. A URL matcher was also defined for the page and the secondary check against the URL matcher also failed. URL matcher: #{@url_matcher}" unless on_page?
       else
+binding.pry
         raise SiteObject::WrongPageError, "Navigation check failed after attempting to access the #{self.class.name} page. Current URL #{@browser.url} did not match #{@url_template.pattern}" unless on_page?
       end
 
