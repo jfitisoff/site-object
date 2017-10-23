@@ -74,7 +74,7 @@ module PageObject
       Module.cattr_accessor :page_features
     end
 
-    attr_reader    :page_attributes, :page_elements, :page_url, :url_template, :url_matcher, :has_fragment
+    attr_reader :page_attributes, :page_elements, :page_url, :url_template, :url_matcher, :has_fragment, :template_arguments, :required_arguments, :query_arguments
 
     # DEPRECATED. Use the set_attributes method instead.
     # This method can be used to disable page navigation when defining a page class (it sets an
@@ -175,14 +175,27 @@ module PageObject
       @page_attributes.include? :page_template
     end
 
-    # Returns an array of symbols representing the required arguments for the page's page URL.
-    def required_arguments
-      @arguments ||= @url_template.keys.map { |k| k.to_sym }
-    end
+    # def template_arguments
+    #   all = @url_template.keys.map { |k| k.to_sym }
+    #   optional = all.find_all { |x| @url_template.pattern =~ /(\?#{x}|\/#{x})/ }
+    #   required = all - optional
+    #   query    = all.find_all { |x| @url_template.pattern =~ /\?#{x}/ }
+    #   @template_arguments = {
+    #     all:      all,
+    #     optional: optional,
+    #     required: required,
+    #     query:    query
+    #   }
+    # end
 
-    def query_arguments
-      required_arguments.find { |x| @url_template.pattern =~ /\?.*#{x}=*/ }
-    end
+    # Returns an array of symbols representing the required arguments for the page's page URL.
+    # def required_arguments
+      # @arguments ||= @url_template.keys.map { |k| k.to_sym }
+    # end
+
+    # def query_arguments
+      # required_arguments.find_all { |x| @url_template.pattern =~ /\?.*#{x}=*/ }
+    # end
 
     # Used to define the full or relative URL to the page. Typically, you will *almost* *always* want to use
     # this method when defining a page object (but see notes below.) The URL can be defined in a number
@@ -285,7 +298,20 @@ module PageObject
       else
         @url_template = Addressable::Template.new(Addressable::URI.parse("#{base_url}#{@page_url}"))
       end
-      @has_fragment = @url_template.pattern =~ /#/
+
+      all = @url_template.keys.map { |k| k.to_sym }
+      optional = all.find_all { |x| @url_template.pattern =~ /(\?#{x}|\/#{x})/ }
+      required = all - optional
+      query    = all.find_all { |x| @url_template.pattern =~ /\?#{x}/ }
+      @template_arguments = {
+        all:      all,
+        optional: optional,
+        required: required,
+        query:    query
+      }
+      @required_arguments = @template_arguments[:required]
+      @query_arguments    = @template_arguments[:query]
+      @has_fragment       = @url_template.pattern =~ /#/
     end
 
     # Optional. Allows you to specify a fallback mechanism for checking to see if the correct page is
@@ -340,7 +366,8 @@ module PageObject
       @page_url = self.class.page_url
       @page_elements = self.class.page_elements
       @page_features = self.class.page_features
-      @required_arguments = self.class.required_arguments
+      @template_arguments = self.class.template_arguments
+      @required_arguments = @template_arguments[:required]
       @site = site
       @url_matcher = self.class.url_matcher
       @url_template = self.class.url_template
@@ -382,10 +409,34 @@ module PageObject
             # Do nothing here yet.
           end
         end
-      elsif @required_arguments.empty? && args # If there are no required arguments then nothing should be provided.
+      elsif @template_arguments[:all].empty? && args # If there are no required/optional arguments then nothing should be provided.
         raise SiteObject::PageInitError, "#{args.class} was provided as a #{self.class.name} initialization argument, but the page URL doesn't require any arguments.\n\n#{caller.join("\n")}"
       else
         # Do nothing here yet.
+      end
+
+      if @template_arguments[:optional].present? && args
+        @template_arguments[:optional].each do |arg|
+          if args.is_a?(Hash) && args.present?
+            args = args.with_indifferent_access
+
+            if args[arg] #The hash has the required argument.
+              @arguments[arg]= args[arg]
+            elsif @site.respond_to?(arg)
+              @arguments[arg]= site.send(arg)
+            else
+              # Do nothing.
+            end
+          elsif args # Some non-hash object was provided.
+            if args.respond_to?(arg) #The hash has the required argument.
+              @arguments[arg]= args.send(arg)
+            elsif @site.respond_to?(arg)
+              @arguments[arg]= site.send(arg)
+            else
+              # Do nothing.
+            end
+          end
+        end
       end
 
       @url = @url_template.expand(@arguments).to_s
