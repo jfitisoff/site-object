@@ -153,7 +153,7 @@ class TestingPageNoArgs < RubyLangTemplate
 end
 
 class TestingPageHasFrag < RubyLangTemplate
-  set_url "/en/#/frag"
+  set_url "/en/test#frag"
 end
 
 class TestingPageBadMatcher < RubyLangTemplate
