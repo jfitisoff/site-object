@@ -148,7 +148,7 @@ describe "Page Object" do
   end
 
   it "uses URL fragment for a page url template that specifies one" do
-    expect(@site.testing_page_has_frag.page_url).to match %r{/en/#/frag$}
+    expect(@site.testing_page_has_frag.page_url).to match %r{/en/test#frag$}
   end
 
   it "strips out a URL fragment when doing matching for a page url template that doesn't specify one" do
