@@ -1,3 +1,3 @@
 module SiteObject
-  VERSION = '0.4.9'
+  VERSION = '0.4.8'
 end

@@ -479,16 +479,10 @@ module PageObject
         raise SiteObject::BrowserLibraryNotSupportedError, "Unsupported browser library: #{@browser.class}"
       end
 
-      if query_arguments
-        if @has_fragment
-          url = url.split(/#/)[0]
-        end
-      else
-        url = url.split(/\?/)[0]
-      end
-
       if @url_matcher
         if @url_matcher =~ url
+          return true
+        elsif @url_matcher =~ url.split(/(#|\?)/)[0]
           return true
         else
           return false
