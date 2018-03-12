@@ -334,7 +334,7 @@ describe "Site Object Browser Management" do
 
     it "opens a browser" do
       @selenium.open_browser(:selenium, :firefox)
-      expect(@selenium.browser).to be_instance_of Selenium::WebDriver::Driver
+      expect(@selenium.browser).to be_instance_of Selenium::WebDriver::Firefox::Marionette::Driver
     end
 
     it "visits a page" do
