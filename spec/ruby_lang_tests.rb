@@ -309,7 +309,7 @@ describe "Site Object Browser Management" do
     end
 
     it "opens a browser" do
-      @watir.open_browser(:watir, :firefox)
+      @watir.open_browser(:watir, :chrome)
       expect(@watir.browser).to be_instance_of Watir::Browser
     end
 

@@ -15,7 +15,7 @@ end
 SimpleCov.start
 
 require 'site-object'
-require 'watir-webdriver'
+require 'watir'
 require 'rspec'
 # require 'rspec_junit_formatter'
 
