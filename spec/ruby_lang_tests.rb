@@ -298,4 +298,32 @@ describe "Site Object Delegation" do
       expect { @site.invalid_method_call }.to raise_error NoMethodError
     end
   end
+
+end
+
+describe "Site Object Browser Management" do
+
+  context "Watir" do
+    before(:all) do
+      @watir = GoogleSite.new(base_url: 'https://www.google.com/')
+    end
+
+    it "opens a browser" do
+      @watir.open_browser(:watir, :chrome)
+      expect(@watir.browser).to be_instance_of Watir::Browser
+    end
+
+    it "visits a page" do
+      expect { @watir.search_page.visit }.to_not raise_error
+    end
+
+    it "refreshes a browser" do
+      expect { @watir.search_page.refresh }.to_not raise_error
+    end
+
+    it "closes a browser" do
+      @watir.browser.close
+      expect(@watir.browser.exists?).to be_falsey
+    end
+  end
 end
