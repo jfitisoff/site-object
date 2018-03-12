@@ -309,7 +309,7 @@ describe "Site Object Browser Management" do
     end
 
     it "opens a browser" do
-      @watir.open_browser(:watir, :firefox)
+      @watir.open_browser(:watir, :chrome)
       expect(@watir.browser).to be_instance_of Watir::Browser
     end
 
@@ -324,57 +324,6 @@ describe "Site Object Browser Management" do
     it "closes a browser" do
       @watir.browser.close
       expect(@watir.browser.exists?).to be_falsey
-    end
-  end
-
-  context "Selenium" do
-    before(:all) do
-      @selenium = GoogleSite.new(base_url: 'https://www.google.com/')
-    end
-
-    it "opens a browser" do
-      @selenium.open_browser(:selenium, :firefox)
-      expect(@selenium.browser).to be_instance_of Selenium::WebDriver::Driver
-    end
-
-    it "visits a page" do
-      expect { @selenium.search_page.visit }.to_not raise_error
-    end
-
-    it "refreshes a browser" do
-      expect { @selenium.search_page.refresh }.to_not raise_error
-    end
-
-    it "closes a browser" do
-      expect { @selenium.browser.close }.to_not raise_error
-    end
-  end
-
-  context "Unknown Browser Library" do
-    before(:all) do
-      @unknown = GoogleSite.new(base_url: 'https://www.google.com/')
-    end
-
-    after(:each) do
-      @unknown.close_browser if @unknown.browser
-    end
-
-    it "won't open a browser when it's not an expected browser object" do
-      expect { @unknown.open_browser(:invalid, :firefox) }.to raise_error SiteObject::BrowserLibraryNotSupportedError
-    end
-
-    it "won't visit a page when the page's browser object isn't an expected variety" do
-      @unknown.open_browser(:watir, :firefox)
-      p = @unknown.search_page
-      p.instance_variable_set :@browser, nil
-      expect { p.visit }.to raise_error SiteObject::BrowserLibraryNotSupportedError
-    end
-
-    it "won't refresh a page when the page's browser object isn't an expected variety" do
-      @unknown.open_browser(:watir, :firefox)
-      p = @unknown.search_page
-      p.instance_variable_set :@browser, nil
-      expect { p.refresh }.to raise_error SiteObject::BrowserLibraryNotSupportedError
     end
   end
 end

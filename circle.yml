@@ -1,8 +1,10 @@
 machine:
   ruby:
-    version: 2.1.9
+    version: 2.3.5
 test:
   pre:
-    - rake install
+    - bundle install
+    - bundle update rake
+    - bundle exec rake install
   post:
     - bundle exec rspec spec/ruby_lang_tests.rb -f html -o $CIRCLE_ARTIFACTS/test_report.html
