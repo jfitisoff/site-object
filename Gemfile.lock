@@ -38,7 +38,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.4.0)
     rspec-support (3.4.1)
-    rubyzip (1.2.0)
+    rubyzip (1.2.1)
     selenium-webdriver (2.52.0)
       childprocess (~> 0.5)
       multi_json (~> 1.0)
@@ -72,8 +72,9 @@ DEPENDENCIES
   coveralls
   rake
   rspec
+  rubyzip (~> 1.2.1)
   simplecov
   watir
 
 BUNDLED WITH
-   1.11.2
+   1.16.1
